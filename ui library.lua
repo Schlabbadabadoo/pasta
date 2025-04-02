@@ -115,19 +115,30 @@ end
 writefile(Library.Folder .. "ProggyClean.ttf", game:HttpGet("https://raw.githubusercontent.com/s0opdev/pasta/main/ProggyClean.ttf?raw=true"))
 
 local Data = {
-	name = "ProggyClean",
-	faces = {
-		{
-			name = "Regular",
-			weight = 200,
-			style = "normal",
-			assetId = getcustomasset(Library.Folder .. "ProggyClean.ttf"),
-		},
-	},
+    name = "ProggyClean",
+    faces = {},
 }
-writefile(Library.Folder .. "ProggyClean.font", httpserv:JSONEncode(Data))
 
-Library.Font = Font.new(getcustomasset(Library.Folder .. "ProggyClean.font"))
+local success, assetId = pcall(function()
+    return getcustomasset(Library.Folder .. "ProggyClean.ttf")
+end)
+
+if not success then return end
+
+table.insert(Data.faces, {
+    name = "Regular",
+    weight = 200,
+    style = "normal",
+    assetId = assetId,
+})
+
+pcall(function()
+    writefile(Library.Folder .. "ProggyClean.font", httpserv:JSONEncode(Data))
+end)
+
+pcall(function()
+    Library.Font = Font.new(getcustomasset(Library.Folder .. "ProggyClean.font"))
+end)
 -- // Functions
 function Library:GetDarkerColor(Color)
 	local H, S, V = Color:ToHSV()
