@@ -811,7 +811,12 @@ function Library:LoadConfigTab(Window)
 				"Vape",
 				"Neko",
 				"Corn",
-				"Minecraft"
+				"Minecraft",
+				"Nord",
+				"Monokai",
+				"Cyberpunk",
+				"Solarized Dark",
+				"Gruvbox"
 			},
 			State = "Tokyo Night",
 			Callback = function(v)
@@ -964,55 +969,46 @@ function Library:LoadConfigTab(Window)
 						OutlineColor = "#000000"
 					},
 					Minecraft = {
-						FontColor = "#ffffff",
-						MainColor = "#2e8b57",
-						Accent = "#8b4513",
-						BackgroundColor = "#1e3f2f",
+						FontColor = "#FFFFFF",
+						MainColor = "#333333",
+						Accent = "#27CE40",
+						BackgroundColor = "#262626",
 						OutlineColor = "#000000"
 					},
-
-	-- New Themes Start Here --
+					Nord = {
+						FontColor = "#D8DEE9",
+						MainColor = "#2E3440",
+						Accent = "#88C0D0",
+						BackgroundColor = "#3B4252",
+						OutlineColor = "#4C566A"
+					},
+					Monokai = {
+						FontColor = "#F8F8F2",
+						MainColor = "#272822",
+						Accent = "#FD971F",
+						BackgroundColor = "#1E1F1C",
+						OutlineColor = "#75715E"
+					},
 					Cyberpunk = {
-						FontColor = "#00FFFF",
-						MainColor = "#1A1A2E",
-						Accent = "#FF00FF",
-						BackgroundColor = "#121212",
-						OutlineColor = "#0A0A0A"
+						FontColor = "#FF66C4",
+						MainColor = "#0D0221",
+						Accent = "#00FFFF",
+						BackgroundColor = "#1A0033",
+						OutlineColor = "#4A0072"
 					},
-					PastelDream = {
-						FontColor = "#4B4B4B",
-						MainColor = "#FFF1F1",
-						Accent = "#FF9AA2",
-						BackgroundColor = "#FDE2E4",
-						OutlineColor = "#D9D9D9"
+					["Solarized Dark"] = {
+						FontColor = "#EEE8D5",
+						MainColor = "#002B36",
+						Accent = "#268BD2",
+						BackgroundColor = "#073642",
+						OutlineColor = "#586E75"
 					},
-					Glacier = {
-						FontColor = "#E0F7FA",
-						MainColor = "#1B262C",
-						Accent = "#00B8D4",
-						BackgroundColor = "#0F4C75",
-						OutlineColor = "#3282B8"
-					},
-					Inferno = {
-						FontColor = "#FFF2E7",
-						MainColor = "#2D1B1B",
-						Accent = "#FF5733",
-						BackgroundColor = "#1A0E0E",
-						OutlineColor = "#3D1F1F"
-					},
-					ZenGarden = {
-						FontColor = "#DDEEDD",
-						MainColor = "#2A3C2B",
-						Accent = "#88CC88",
-						BackgroundColor = "#1F2B1F",
-						OutlineColor = "#0F1F0F"
-					},
-					MonoNoir = {
-						FontColor = "#C0C0C0",
-						MainColor = "#1E1E1E",
-						Accent = "#808080",
-						BackgroundColor = "#101010",
-						OutlineColor = "#000000"
+					Gruvbox = {
+						FontColor = "#EBDBB2",
+						MainColor = "#282828",
+						Accent = "#FE8019",
+						BackgroundColor = "#1D2021",
+						OutlineColor = "#3C3836"
 					}
 				}
 
