@@ -583,93 +583,6 @@ function Library:IsMouseOverFrame(Frame)
 	end;
 	return false
 end;
-function Library:Watermark()
-    local Watermark = {
-        Text = "Pasta.lua | FPS: 0",
-        Visible = true
-    }
-    Library.Watermark = Watermark
-
-    -- Create the watermark UI
-    local WatermarkOuter = Library:Create("Frame", {
-        AnchorPoint = Vector2.new(0, 0),
-        BorderColor3 = Color3.new(0, 0, 0),
-        Position = UDim2.new(0, 10, 0, 10),
-        Size = UDim2.new(0, 200, 0, 20),
-        Visible = Watermark.Visible,
-        Parent = Library.ScreenGui
-    })
-
-    local WatermarkInner = Library:Create("Frame", {
-        BackgroundColor3 = Library.MainColor,
-        BorderColor3 = Library.OutlineColor,
-        BorderMode = Enum.BorderMode.Inset,
-        Size = UDim2.new(1, 0, 1, 0),
-        Parent = WatermarkOuter
-    })
-
-    Library:Create("Frame", {
-        BackgroundColor3 = Library.Accent,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 2),
-        Parent = WatermarkInner
-    })
-
-    local WatermarkLabel = Library:Create("TextLabel", {
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.fromOffset(5, 0),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Text = Watermark.Text,
-        BackgroundTransparency = 1,
-        TextColor3 = Library.FontColor,
-        FontFace = Library.Font,
-        TextSize = 12.5,
-        TextStrokeTransparency = 0,
-        Parent = WatermarkInner
-    })
-
-    -- Dragging logic
-    local Dragging = false
-    local DragOffset = Vector2.new(0, 0)
-
-    WatermarkOuter.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            Dragging = true
-            local mousePos = userinput:GetMouseLocation()
-            DragOffset = Vector2.new(mousePos.X, mousePos.Y) - Vector2.new(WatermarkOuter.AbsolutePosition.X, WatermarkOuter.AbsolutePosition.Y)
-        end
-    end)
-
-    userinput.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            Dragging = false
-        end
-    end)
-
-    userinput.InputChanged:Connect(function(input)
-        if Dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = userinput:GetMouseLocation()
-            WatermarkOuter.Position = UDim2.new(0, mousePos.X - DragOffset.X, 0, mousePos.Y - DragOffset.Y)
-        end
-    end)
-
-    -- FPS update logic
-    task.spawn(function()
-        while true do
-            local fps = math.floor(1 / runserv.RenderStepped:Wait())
-            WatermarkLabel.Text = string.format("Pasta.lua | FPS: %d", fps)
-            task.wait(1)
-        end
-    end)
-
-    -- Visibility toggle
-    function Watermark:SetVisible(state)
-        Watermark.Visible = state
-        WatermarkOuter.Visible = state
-    end
-
-    return Watermark
-end
 function Library:KeybindList()
 	local KeyList = {
 		Keybinds = {}
@@ -1142,16 +1055,6 @@ function Library:LoadConfigTab(Window)
 			Flag = "KeybindList",
 			Callback = function(v)
 				Library.KeyList:SetVisible(v)
-			end
-		})
-		Menu:Toggle({
-			Name = "Show Watermark",
-			Flag = "Watermark",
-			State = false,
-			Callback = function(state)
-				if Library.Watermark then
-					Library.Watermark:SetVisible(state)
-				end
 			end
 		})
 		Menu:Button({
