@@ -975,10 +975,10 @@ function Library:LoadConfigTab(Window)
 						OutlineColor = "#000000"
 					},
 					Corn = {
-						FontColor = "#ffffff",
-						MainColor = "#f5e960",
-						Accent = "#ffb347",
-						BackgroundColor = "#fff8dc",
+						FontColor = "#DCDCDC",
+						MainColor = "#252525",
+						Accent = "#FF9000",
+						BackgroundColor = "#191919",
 						OutlineColor = "#000000"
 					},
 					Minecraft = {
