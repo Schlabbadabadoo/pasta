@@ -591,6 +591,7 @@ function Library:Watermark()
         false,
         UDim2.new(0, 0, 0, 0)
     }
+    -- Assign the Watermark object to Library.Watermark
     Library.Watermark = Watermark
 
     -- Create the outer frame for the watermark
