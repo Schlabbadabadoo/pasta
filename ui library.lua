@@ -583,27 +583,55 @@ function Library:IsMouseOverFrame(Frame)
 	end;
 	return false
 end;
-function Library:KeybindList()
-    local KeyList = {
-        Keybinds = {}
-    }
-    local Dragging = {
-        false,
-        UDim2.new(0, 0, 0, 0)
-    }
-    Library.KeyList = KeyList
-    local KeybindOuter = Library:Create('Frame', {
-        AnchorPoint = Vector2.new(0, 0.5),
-        BorderColor3 = "OutlineColor",
-        Position = UDim2.new(0, 10, 0.5, 0),
-        Size = UDim2.new(0, 50, 0, 20),
+function Library:CreateWatermark()
+    local Watermark = Library:Create("Frame", {
+        Parent = Library.ScreenGui,
+        BackgroundColor3 = Color3.new(0.0588, 0.0588, 0.0784),
+        BorderColor3 = Color3.new(0.1373, 0.1373, 0.1569),
+        Position = UDim2.new(0, 10, 0, 10),
+        Size = UDim2.new(0, 200, 0, 20),
+        ZIndex = 99999999,
         Visible = false,
-        Parent = Library.ScreenGui
-    })
-    Library:AddToThemeObjects(KeybindOuter, {
-        BorderColor3 = "OutlineColor"
     })
 
+    local TextLabel = Library:Create("TextLabel", {
+        Parent = Watermark,
+        Position = UDim2.new(0, 5, 0, 0),
+        Size = UDim2.new(1, -10, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "Pasta.lua | FPS: 0",
+        TextColor3 = Color3.new(0.9216, 0.9216, 0.9216),
+        FontFace = Library.Font,
+        TextSize = Library.FontSize,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+
+    task.spawn(function()
+        while task.wait(1) do
+            local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
+            TextLabel.Text = string.format("Pasta.lua | FPS: %d", fps)
+        end
+    end)
+
+    return Watermark
+end
+function Library:KeybindList()
+	local KeyList = {
+		Keybinds = {}
+	}
+	local Dragging = {
+		false,
+		UDim2.new(0, 0, 0, 0)
+	}
+	Library.KeyList = KeyList
+	local KeybindOuter = Library:Create('Frame', {
+		AnchorPoint = Vector2.new(0, 0.5),
+		BorderColor3 = Color3.new(0, 0, 0),
+		Position = UDim2.new(0, 10, 0.5, 0),
+		Size = UDim2.new(0, 50, 0, 20),
+		Visible = false,
+		Parent = Library.ScreenGui
+	})
 	local KeybindInner = Library:Create('Frame', {
 		BackgroundColor3 = "MainColor",
 		BorderColor3 = "OutlineColor",
@@ -611,158 +639,136 @@ function Library:KeybindList()
 		Size = UDim2.new(1, 0, 1, 0),
 		Parent = KeybindOuter
 	})
-	Library:AddToThemeObjects(KeybindInner, {
+	Library:Create('Frame', {
+		BackgroundColor3 = "Accent";
+		BorderSizePixel = 0;
+		Size = UDim2.new(1, 0, 0, 2);
+		Parent = KeybindInner;
+	});
+	local KeybindLabel = Library:Create('TextButton', {
+		Size = UDim2.new(1, 0, 0, 20),
+		Position = UDim2.fromOffset(5, 2),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Text = 'Keybinds',
 		BackgroundColor3 = "MainColor",
-		BorderColor3 = "OutlineColor"
-	})
-
-    Library:Create('Frame', {
-        BackgroundColor3 = "Accent",
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 2),
-        Parent = KeybindInner
-    })
-	local HighlightBar = Library:Create('Frame', {
-		BackgroundColor3 = "Accent",
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, 0, 0, 2), -- Adjust height as needed
+		BackgroundTransparency = 1,
+		TextColor3 = "FontColor",
+		FontFace = Library.Font,
+		TextSize = 12.5,
+		TextStrokeTransparency = 0,
 		Parent = KeybindInner
 	})
-	Library:AddToThemeObjects(HighlightBar, {
-		BackgroundColor3 = "Accent"
+
+	local KeybindContainer = Library:Create('Frame', {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(1, -10, 1, -30),
+		Position = UDim2.new(0, 5, 0, 26),
+		Parent = KeybindInner
 	})
-    -- Keybind label
-    local KeybindLabel = Library:Create('TextButton', {
-        Size = UDim2.new(1, 0, 0, 20),
-        Position = UDim2.fromOffset(5, 2),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Text = 'Keybinds',
-        BackgroundColor3 = "MainColor",
-        BackgroundTransparency = 1,
-        TextColor3 = "FontColor",
-        FontFace = Library.Font,
-        TextSize = 12.5,
-        TextStrokeTransparency = 0,
-        Parent = KeybindInner
-    })
-    Library:AddToThemeObjects(KeybindLabel, {
-        TextColor3 = "FontColor"
-    })
+	Library:Create('UIListLayout', {
+		FillDirection = Enum.FillDirection.Vertical,
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = KeybindContainer
+	})
+	Library:Create('UIPadding', {
+		PaddingLeft = UDim.new(0, -8),
+		Parent = KeybindContainer
+	})
+	Library:Connection(KeybindLabel.MouseButton1Down, function()
+		local Location = userinput:GetMouseLocation()
+		Dragging[1] = true
+		Dragging[2] = UDim2.new(0, Location.X - KeybindOuter.AbsolutePosition.X, 0, Location.Y - KeybindOuter.AbsolutePosition.Y)
+	end)
+	Library:Connection(userinput.InputEnded, function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 and Dragging[1] then
+			Dragging[1] = false
+			Dragging[2] = UDim2.new(0, 0, 0, 0)
+		end
+	end)
+	Library:Connection(userinput.InputChanged, function()
+		if Dragging[1] then
+			local Location = userinput:GetMouseLocation()
+			KeybindOuter.Position = UDim2.new(
+				0,
+				Location.X - Dragging[2].X.Offset + (KeybindOuter.Size.X.Offset * KeybindOuter.AnchorPoint.X),
+				0,
+				Location.Y - Dragging[2].Y.Offset + (KeybindOuter.Size.Y.Offset * KeybindOuter.AnchorPoint.Y)
+			)
+		end
+	end)
 
-    -- Keybind container
-    local KeybindContainer = Library:Create('Frame', {
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, -10, 1, -30),
-        Position = UDim2.new(0, 5, 0, 26),
-        Parent = KeybindInner
-    })
-    Library:Create('UIListLayout', {
-        FillDirection = Enum.FillDirection.Vertical,
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Parent = KeybindContainer
-    })
-    Library:Create('UIPadding', {
-        PaddingLeft = UDim.new(0, -8),
-        Parent = KeybindContainer
-    })
+	local function UpdateSize()
+		local YSize = 0
+		local XSize = 0
+	
+		for _, Label in next, KeybindContainer:GetChildren() do
+			if Label:IsA('TextLabel') and Label.Visible then
+				YSize = YSize + 15;
+				if (Label.TextBounds.X > XSize) then
+					XSize = Label.TextBounds.X
+				end
+			end;
+		end;
 
-    -- Dragging functionality
-    Library:Connection(KeybindLabel.MouseButton1Down, function()
-        local Location = userinput:GetMouseLocation()
-        Dragging[1] = true
-        Dragging[2] = UDim2.new(0, Location.X - KeybindOuter.AbsolutePosition.X, 0, Location.Y - KeybindOuter.AbsolutePosition.Y)
-    end)
-    Library:Connection(userinput.InputEnded, function(Input)
-        if Input.UserInputType == Enum.UserInputType.MouseButton1 and Dragging[1] then
-            Dragging[1] = false
-            Dragging[2] = UDim2.new(0, 0, 0, 0)
-        end
-    end)
-    Library:Connection(userinput.InputChanged, function()
-        if Dragging[1] then
-            local Location = userinput:GetMouseLocation()
-            KeybindOuter.Position = UDim2.new(
-                0,
-                Location.X - Dragging[2].X.Offset + (KeybindOuter.Size.X.Offset * KeybindOuter.AnchorPoint.X),
-                0,
-                Location.Y - Dragging[2].Y.Offset + (KeybindOuter.Size.Y.Offset * KeybindOuter.AnchorPoint.Y)
-            )
-        end
-    end)
+		KeybindOuter.Size = UDim2.new(0, math.max(XSize + 2.5, 210), 0, YSize + 32)
+	end
+	
 
-    -- Update size dynamically
-    local function UpdateSize()
-        local YSize = 0
-        local XSize = 0
-
-        for _, Label in next, KeybindContainer:GetChildren() do
-            if Label:IsA('TextLabel') and Label.Visible then
-                YSize = YSize + 15
-                if (Label.TextBounds.X > XSize) then
-                    XSize = Label.TextBounds.X
-                end
-            end
-        end
-
-        KeybindOuter.Size = UDim2.new(0, math.max(XSize + 2.5, 210), 0, YSize + 32)
-    end
-
-    function KeyList:SetVisible(State)
-        KeybindOuter.Visible = State
-    end
-
-    function KeyList:NewKey(Key, Name, Mode)
-        if not Key or Key == "" then
-            return
-        end
-        local KeyValue = {}
-        local TextShit = Mode and tostring(" [" .. Key .. "] " .. Name .. " (" .. Mode .. ") ") or tostring(" [" .. Key .. "] " .. Name)
-        local NewValue = Library:Create('TextLabel', {
-            Parent = KeybindContainer,
-            Size = UDim2.new(1, -10, 0, 15),
-            BackgroundColor3 = Color3.new(1, 1, 1),
-            BackgroundTransparency = 1,
-            BorderSizePixel = 0,
-            Text = TextShit,
-            TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-            FontFace = Library.Font,
-            TextSize = 12,
-            TextStrokeTransparency = 0,
-            AutomaticSize = Enum.AutomaticSize.Y,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            LayoutOrder = #KeybindContainer:GetChildren() + 1,
-            Visible = false
-        })
-        function KeyValue:SetVisible(value)
-            NewValue.Visible = value
-            UpdateSize()
-        end
-        function KeyValue:Update(NewKey, NewName, NewMode)
-            local NLECHOPPAWTF = NewMode and tostring(" [" .. NewKey .. "] " .. NewName .. " (" .. NewMode .. ") ") or tostring(" [" .. NewKey .. "] " .. NewName)
-            NewValue.Text = NLECHOPPAWTF
-            NewValue.Visible = true
-            UpdateSize()
-        end
-        local iscolor = false
-        function KeyValue:SetColorBlue(hi)
-            if hi then
-                iscolor = hi
-            else
-                iscolor = not iscolor
-            end
-            if iscolor then
-                Library:TweenProperty(NewValue, "TextColor3", Library.Accent, 0.2)
-                Library:AddToThemeObjects(NewValue, {
-                    TextColor3 = "Accent"
-                })
-            else
-                Library:TweenProperty(NewValue, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
-                Library:RemoveFromThemeObjects(NewValue)
-            end
-        end
-        return KeyValue
-    end
-    return KeyList
+	function KeyList:SetVisible(State)
+		KeybindOuter.Visible = State
+	end
+	function KeyList:NewKey(Key, Name, Mode)
+		if not Key or Key == "" then
+			return
+		end
+		local KeyValue = {}
+		local TextShit = Mode and tostring(" [" .. Key .. "] " .. Name .. " (" .. Mode .. ") ") or tostring(" [" .. Key .. "] " .. Name)
+		local NewValue = Library:Create('TextLabel', {
+			Parent = KeybindContainer,
+			Size = UDim2.new(1, -10, 0, 15),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			Text = TextShit,
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			FontFace = Library.Font,
+			TextSize = 12,
+			TextStrokeTransparency = 0,
+			AutomaticSize = Enum.AutomaticSize.Y,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			LayoutOrder = #KeybindContainer:GetChildren() + 1,
+			Visible = false
+		})
+		function KeyValue:SetVisible(value)
+			NewValue.Visible = value
+			UpdateSize()
+		end
+		function KeyValue:Update(NewKey, NewName, NewMode)
+			local NLECHOPPAWTF = NewMode and tostring(" [" .. NewKey .. "] " .. NewName .. " (" .. NewMode .. ") ") or tostring(" [" .. NewKey .. "] " .. NewName)
+			NewValue.Text = NLECHOPPAWTF
+			NewValue.Visible = true
+			UpdateSize()
+		end
+		local iscolor = false
+		function KeyValue:SetColorBlue(hi)
+			if hi then
+				iscolor = hi
+			else
+				iscolor = not iscolor
+			end
+			if iscolor then
+				Library:TweenProperty(NewValue, "TextColor3", Library.Accent, 0.2)
+				Library:AddToThemeObjects(NewValue, {
+					TextColor3 = "Accent"
+				})
+			else
+				Library:TweenProperty(NewValue, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
+				Library:RemoveFromThemeObjects(NewValue)
+			end
+		end
+		return KeyValue
+	end
+	return KeyList
 end
 --
 function Library:LoadConfigTab(Window)
@@ -1077,11 +1083,21 @@ function Library:LoadConfigTab(Window)
 			Callback = Library.SetOpen
 		})
 		Menu:Toggle({
-			Name = "Keybind List",
-			Flag = "KeybindList",
-			Callback = function(v)
-				Library.KeyList:SetVisible(v)
+			Name = "Show Watermark",
+			Flag = "Watermark",
+			State = false, -- Default state is off
+			Callback = function(state)
+				if Library.Watermark then
+					Library.Watermark.Visible = state
+				end
 			end
+		})
+		Menu:Toggle({
+			Name = "Show Watermark",
+			State = false,
+			Callback = function(state)
+				Watermark.Visible = state
+			end,
 		})
 		Menu:Button({
 			Name = "Unload",
