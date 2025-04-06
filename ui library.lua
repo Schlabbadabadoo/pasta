@@ -588,7 +588,7 @@ function Library:CreateWatermark()
         Parent = Library.ScreenGui,
         BackgroundColor3 = Color3.new(0.0588, 0.0588, 0.0784),
         BorderColor3 = Color3.new(0.1373, 0.1373, 0.1569),
-        Position = UDim2.new(0, 10, 0, 10),
+        Position = UDim2.new(0, 10, 0, 10), -- Default position
         Size = UDim2.new(0, 200, 0, 20),
         ZIndex = 99999999,
         Visible = false,
@@ -606,10 +606,41 @@ function Library:CreateWatermark()
         TextXAlignment = Enum.TextXAlignment.Left,
     })
 
+    -- Update FPS dynamically
     task.spawn(function()
         while task.wait(1) do
             local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
             TextLabel.Text = string.format("Pasta.lua | FPS: %d", fps)
+        end
+    end)
+
+    -- Add drag functionality
+    local dragging = false
+    local dragStart, startPos
+
+    Watermark.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = Watermark.Position
+        end
+    end)
+
+    Watermark.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            Watermark.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+
+    Watermark.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
         end
     end)
 
