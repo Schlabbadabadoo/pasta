@@ -790,8 +790,8 @@ function Library:LoadConfigTab(Window)
 			Name = "Presets",
 			Flag = "UI/Presets",
 			Options = {
-				"Kanagawa",						
 				"Tokyo Night",
+				"Kanagawa",						
 				"Quartz",
 				"BBot",
 				"Fatality",
@@ -831,9 +831,16 @@ function Library:LoadConfigTab(Window)
 				"One Dark",
 				"Tokyo Dark"
 			},
-			State = "Kanagawa",
+			State = "Tokyo Night",
 			Callback = function(v)
 				local themes = {
+					["Tokyo Night"] = {
+						FontColor = "#c0caf5",
+						MainColor = "#1a1b26",
+						Accent = "#7778ff",
+						BackgroundColor = "#16161e",
+						OutlineColor = "#000000"
+					},
 					Kanagawa = {
 						FontColor = "#dcd7ba",
 						MainColor = "#1f1f28",
@@ -841,13 +848,6 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#1a1a22",
 						OutlineColor = "#000000"
 					},						
-					["Tokyo Night"] = {
-						FontColor = "#c0caf5",
-						MainColor = "#1a1b26",
-						Accent = "#7aa2f7",
-						BackgroundColor = "#16161e",
-						OutlineColor = "#000000"
-					},
 					Quartz = {
 						FontColor = "#ffffff",
 						MainColor = "#2e2e2e",
