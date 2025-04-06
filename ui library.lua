@@ -828,13 +828,12 @@ function Library:LoadConfigTab(Window)
 				"PaperColor Dark",
 				"Edge",
 				"One Dark",
-				"Tokyo Dark",
-				"Kanagawa"
+				"Tokyo Dark"
 			},
 			State = "Tokyo Night",
 			Callback = function(v)
 				local themes = {
-					TokyoNight = {
+					["TokyoNight"] = {
 						FontColor = "#c0caf5",
 						MainColor = "#1a1b26",
 						Accent = "#7aa2f7",
@@ -1023,14 +1022,14 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#1D2021",
 						OutlineColor = "#3C3836"
 					},
-					NightOwl = {
+					["Night Owl"] = {
 						FontColor = "#d6deeb",
 						MainColor = "#011627",
 						Accent = "#82AAFF",
 						BackgroundColor = "#0f111a",
 						OutlineColor = "#000000"
 					},
-					ArcDark = {
+					["Arc Dark"] = {
 						FontColor = "#ffffff",
 						MainColor = "#383c4a",
 						Accent = "#5294e2",
@@ -1044,7 +1043,7 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#181825",
 						OutlineColor = "#000000"
 					},
-					TomorrowNight = {
+					["Tomorrow Night"] = {
 						FontColor = "#cccccc",
 						MainColor = "#1d1f21",
 						Accent = "#81a2be",
@@ -1058,14 +1057,14 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#272822",
 						OutlineColor = "#000000"
 					},
-					MaterialPalenight = {
+					["Material Palenight"] = {
 						FontColor = "#c3e88d",
 						MainColor = "#292d3e",
 						Accent = "#82aaff",
 						BackgroundColor = "#1e212e",
 						OutlineColor = "#000000"
 					},
-					OceanicNext = {
+					["Oceanic Next"] = {
 						FontColor = "#d8dee9",
 						MainColor = "#1b2b34",
 						Accent = "#6699cc",
@@ -1079,7 +1078,7 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#2c2f36",
 						OutlineColor = "#000000"
 					},
-					PaperColorDark = {
+					["PaperColor Dark"] = {
 						FontColor = "#eeeeee",
 						MainColor = "#1c1c1c",
 						Accent = "#af5f5f",
@@ -1093,25 +1092,18 @@ function Library:LoadConfigTab(Window)
 						BackgroundColor = "#1c1f26",
 						OutlineColor = "#000000"
 					},
-					OneDark = {
+					["One Dark"] = {
 						FontColor = "#abb2bf",
 						MainColor = "#282c34",
 						Accent = "#61afef",
 						BackgroundColor = "#21252b",
 						OutlineColor = "#000000"
 					},
-					TokyoDark = {
+					["Tokyo Dark"] = {
 						FontColor = "#c0caf5",
 						MainColor = "#16161e",
 						Accent = "#9aa5ce",
 						BackgroundColor = "#0d0d15",
-						OutlineColor = "#000000"
-					},
-					Kanagawa = {
-						FontColor = "#dcd7ba",
-						MainColor = "#1f1f28",
-						Accent = "#957fb8",
-						BackgroundColor = "#1a1a22",
 						OutlineColor = "#000000"
 					}
 				}
