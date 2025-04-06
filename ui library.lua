@@ -594,12 +594,16 @@ function Library:KeybindList()
     Library.KeyList = KeyList
     local KeybindOuter = Library:Create('Frame', {
         AnchorPoint = Vector2.new(0, 0.5),
-        BorderColor3 = Color3.new(0, 0, 0),
+        BorderColor3 = "OutlineColor",
         Position = UDim2.new(0, 10, 0.5, 0),
         Size = UDim2.new(0, 50, 0, 20),
         Visible = false,
         Parent = Library.ScreenGui
     })
+    Library:AddToThemeObjects(KeybindOuter, {
+        BorderColor3 = "OutlineColor"
+    })
+
     local KeybindInner = Library:Create('Frame', {
         BackgroundColor3 = "MainColor",
         BorderColor3 = "OutlineColor",
@@ -607,31 +611,17 @@ function Library:KeybindList()
         Size = UDim2.new(1, 0, 1, 0),
         Parent = KeybindOuter
     })
+    Library:AddToThemeObjects(KeybindInner, {
+        BackgroundColor3 = "MainColor",
+        BorderColor3 = "OutlineColor"
+    })
+
     Library:Create('Frame', {
         BackgroundColor3 = "Accent",
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 2),
         Parent = KeybindInner
     })
-
-    -- Add dynamic highlight effect
-    local Highlight = Library:Create('Frame', {
-        Parent = KeybindOuter,
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.9,
-        ZIndex = -1
-    })
-    Library:ApplyUICorner(Highlight, 8)
-
-    -- Update highlight size and position dynamically
-    local function UpdateHighlight()
-        Highlight.Size = KeybindOuter.Size + UDim2.new(0, 10, 0, 10)
-        Highlight.Position = UDim2.new(0, -5, 0, -5)
-    end
-
-    -- Call UpdateHighlight whenever the size changes
-    KeybindOuter:GetPropertyChangedSignal("Size"):Connect(UpdateHighlight)
-    UpdateHighlight()
 
     -- Keybind label
     local KeybindLabel = Library:Create('TextButton', {
@@ -646,6 +636,9 @@ function Library:KeybindList()
         TextSize = 12.5,
         TextStrokeTransparency = 0,
         Parent = KeybindInner
+    })
+    Library:AddToThemeObjects(KeybindLabel, {
+        TextColor3 = "FontColor"
     })
 
     -- Keybind container
@@ -704,7 +697,6 @@ function Library:KeybindList()
         end
 
         KeybindOuter.Size = UDim2.new(0, math.max(XSize + 2.5, 210), 0, YSize + 32)
-        UpdateHighlight()
     end
 
     function KeyList:SetVisible(State)
