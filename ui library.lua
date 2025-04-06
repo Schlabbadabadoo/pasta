@@ -593,6 +593,7 @@ function Library:Watermark()
     }
     Library.Watermark = Watermark
 
+    -- Create the outer frame for the watermark
     local WatermarkOuter = Library:Create('Frame', {
         AnchorPoint = Vector2.new(0, 0),
         BorderColor3 = Color3.new(0, 0, 0),
@@ -601,44 +602,53 @@ function Library:Watermark()
         Visible = true,
         Parent = Library.ScreenGui
     })
+
+    -- Create the inner frame for styling
     local WatermarkInner = Library:Create('Frame', {
-        BackgroundColor3 = "MainColor",
-        BorderColor3 = "OutlineColor",
+        BackgroundColor3 = Library.MainColor,
+        BorderColor3 = Library.OutlineColor,
         BorderMode = Enum.BorderMode.Inset,
         Size = UDim2.new(1, 0, 1, 0),
         Parent = WatermarkOuter
     })
+
+    -- Add an accent bar at the top of the watermark
     Library:Create('Frame', {
-        BackgroundColor3 = "Accent",
+        BackgroundColor3 = Library.Accent,
         BorderSizePixel = 0,
         Size = UDim2.new(1, 0, 0, 2),
         Parent = WatermarkInner
     })
+
+    -- Add the text label for the watermark
     local WatermarkLabel = Library:Create('TextLabel', {
         Size = UDim2.new(1, 0, 1, 0),
         Position = UDim2.fromOffset(5, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         Text = Watermark.Text,
-        BackgroundColor3 = "MainColor",
+        BackgroundColor3 = Library.MainColor,
         BackgroundTransparency = 1,
-        TextColor3 = "FontColor",
+        TextColor3 = Library.FontColor,
         FontFace = Library.Font,
         TextSize = 12.5,
         TextStrokeTransparency = 0,
         Parent = WatermarkInner
     })
 
+    -- Enable dragging functionality for the watermark
     Library:Connection(WatermarkLabel.MouseButton1Down, function()
         local Location = userinput:GetMouseLocation()
         Dragging[1] = true
         Dragging[2] = UDim2.new(0, Location.X - WatermarkOuter.AbsolutePosition.X, 0, Location.Y - WatermarkOuter.AbsolutePosition.Y)
     end)
+
     Library:Connection(userinput.InputEnded, function(Input)
         if Input.UserInputType == Enum.UserInputType.MouseButton1 and Dragging[1] then
             Dragging[1] = false
             Dragging[2] = UDim2.new(0, 0, 0, 0)
         end
     end)
+
     Library:Connection(userinput.InputChanged, function()
         if Dragging[1] then
             local Location = userinput:GetMouseLocation()
@@ -651,6 +661,7 @@ function Library:Watermark()
         end
     end)
 
+    -- Update the watermark text dynamically (e.g., FPS counter)
     task.spawn(function()
         while task.wait(1) do
             local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())
@@ -658,6 +669,7 @@ function Library:Watermark()
         end
     end)
 
+    -- Add the SetVisible method to toggle visibility
     function Watermark:SetVisible(State)
         WatermarkOuter.Visible = State
     end
