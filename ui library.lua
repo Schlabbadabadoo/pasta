@@ -833,7 +833,7 @@ function Library:LoadConfigTab(Window)
 			State = "Tokyo Night",
 			Callback = function(v)
 				local themes = {
-					["TokyoNight"] = {
+					["Tokyo Night"] = {
 						FontColor = "#c0caf5",
 						MainColor = "#1a1b26",
 						Accent = "#7aa2f7",
