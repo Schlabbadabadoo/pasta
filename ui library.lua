@@ -816,7 +816,20 @@ function Library:LoadConfigTab(Window)
 				"Monokai",
 				"Cyberpunk",
 				"Solarized Dark",
-				"Gruvbox"
+				"Gruvbox",
+				"Night Owl",
+				"Arc Dark",
+				"Catppuccin",
+				"Tomorrow Night",
+				"Molokai",
+				"Material Palenight",
+				"Oceanic Next",
+				"Spacegray",
+				"PaperColor Dark",
+				"Edge",
+				"One Dark",
+				"Tokyo Dark",
+				"Kanagawa"
 			},
 			State = "Tokyo Night",
 			Callback = function(v)
@@ -1009,6 +1022,97 @@ function Library:LoadConfigTab(Window)
 						Accent = "#FE8019",
 						BackgroundColor = "#1D2021",
 						OutlineColor = "#3C3836"
+					},
+					NightOwl = {
+						FontColor = "#d6deeb",
+						MainColor = "#011627",
+						Accent = "#82AAFF",
+						BackgroundColor = "#0f111a",
+						OutlineColor = "#000000"
+					},
+					ArcDark = {
+						FontColor = "#ffffff",
+						MainColor = "#383c4a",
+						Accent = "#5294e2",
+						BackgroundColor = "#2f343f",
+						OutlineColor = "#000000"
+					},
+					Catppuccin = {
+						FontColor = "#cdd6f4",
+						MainColor = "#1e1e2e",
+						Accent = "#89b4fa",
+						BackgroundColor = "#181825",
+						OutlineColor = "#000000"
+					},
+					TomorrowNight = {
+						FontColor = "#cccccc",
+						MainColor = "#1d1f21",
+						Accent = "#81a2be",
+						BackgroundColor = "#282a2e",
+						OutlineColor = "#000000"
+					},
+					Molokai = {
+						FontColor = "#f8f8f2",
+						MainColor = "#1b1d1e",
+						Accent = "#fd971f",
+						BackgroundColor = "#272822",
+						OutlineColor = "#000000"
+					},
+					MaterialPalenight = {
+						FontColor = "#c3e88d",
+						MainColor = "#292d3e",
+						Accent = "#82aaff",
+						BackgroundColor = "#1e212e",
+						OutlineColor = "#000000"
+					},
+					OceanicNext = {
+						FontColor = "#d8dee9",
+						MainColor = "#1b2b34",
+						Accent = "#6699cc",
+						BackgroundColor = "#0f1c26",
+						OutlineColor = "#000000"
+					},
+					Spacegray = {
+						FontColor = "#ffffff",
+						MainColor = "#20242b",
+						Accent = "#b3b3b3",
+						BackgroundColor = "#2c2f36",
+						OutlineColor = "#000000"
+					},
+					PaperColorDark = {
+						FontColor = "#eeeeee",
+						MainColor = "#1c1c1c",
+						Accent = "#af5f5f",
+						BackgroundColor = "#121212",
+						OutlineColor = "#000000"
+					},
+					Edge = {
+						FontColor = "#ffffff",
+						MainColor = "#262a33",
+						Accent = "#528bff",
+						BackgroundColor = "#1c1f26",
+						OutlineColor = "#000000"
+					},
+					OneDark = {
+						FontColor = "#abb2bf",
+						MainColor = "#282c34",
+						Accent = "#61afef",
+						BackgroundColor = "#21252b",
+						OutlineColor = "#000000"
+					},
+					TokyoDark = {
+						FontColor = "#c0caf5",
+						MainColor = "#16161e",
+						Accent = "#9aa5ce",
+						BackgroundColor = "#0d0d15",
+						OutlineColor = "#000000"
+					},
+					Kanagawa = {
+						FontColor = "#dcd7ba",
+						MainColor = "#1f1f28",
+						Accent = "#957fb8",
+						BackgroundColor = "#1a1a22",
+						OutlineColor = "#000000"
 					}
 				}
 
