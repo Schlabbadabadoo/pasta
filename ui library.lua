@@ -151,40 +151,50 @@ function Library:TweenProperty(object, property, endValue, duration)
 	end)
 	return tween
 end
+function Library:ApplyUICorner(instance, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius)
+    corner.Parent = instance
+end
 function Library:Create(Class, Properties, Secure)
-	local instance = Instance.new(Class)
-	
-	if Secure then
-		ProtectGui(instance)
-	end
-	
-	local colorMapping = {
-		FontColor = Library.FontColor,
-		Accent = Library.Accent,
-		DarkerAccent = Library.DarkerAccent,
-		OutlineColor = Library.OutlineColor,
-		MainColor = Library.MainColor,
-		BackgroundColor = Library.BackgroundColor
-	}
-	
-	local themeProperties = {}
-	
-	for Property, Value in pairs(Properties) do
-		local resolvedValue = Value
-		
-		if typeof(Value) == "string" and colorMapping[Value] then
-			resolvedValue = colorMapping[Value]
-			themeProperties[Property] = Value
-		end
-		
-		instance[Property] = resolvedValue
-	end
-	
-	if next(themeProperties) then
-		Library:AddToThemeObjects(instance, themeProperties)
-	end
-	
-	return instance
+    local instance = Instance.new(Class)
+    
+    if Secure then
+        ProtectGui(instance)
+    end
+    
+    local colorMapping = {
+        FontColor = Library.FontColor,
+        Accent = Library.Accent,
+        DarkerAccent = Library.DarkerAccent,
+        OutlineColor = Library.OutlineColor,
+        MainColor = Library.MainColor,
+        BackgroundColor = Library.BackgroundColor
+    }
+    
+    local themeProperties = {}
+    
+    for Property, Value in pairs(Properties) do
+        local resolvedValue = Value
+        
+        if typeof(Value) == "string" and colorMapping[Value] then
+            resolvedValue = colorMapping[Value]
+            themeProperties[Property] = Value
+        end
+        
+        instance[Property] = resolvedValue
+    end
+    
+    if next(themeProperties) then
+        Library:AddToThemeObjects(instance, themeProperties)
+    end
+    
+    -- Apply rounding to UI elements
+    if instance:IsA("") then
+        Library:ApplyUICorner(instance, 6)
+    end
+    
+    return instance
 end
 
 function Library:Connection(Signal, Callback)
@@ -584,35 +594,44 @@ function Library:IsMouseOverFrame(Frame)
 	return false
 end;
 function Library:KeybindList()
-	local KeyList = {
-		Keybinds = {}
-	}
-	local Dragging = {
-		false,
-		UDim2.new(0, 0, 0, 0)
-	}
-	Library.KeyList = KeyList
-	local KeybindOuter = Library:Create('Frame', {
-		AnchorPoint = Vector2.new(0, 0.5),
-		BorderColor3 = Color3.new(0, 0, 0),
-		Position = UDim2.new(0, 10, 0.5, 0),
-		Size = UDim2.new(0, 50, 0, 20),
-		Visible = false,
-		Parent = Library.ScreenGui
-	})
-	local KeybindInner = Library:Create('Frame', {
-		BackgroundColor3 = "MainColor",
-		BorderColor3 = "OutlineColor",
-		BorderMode = Enum.BorderMode.Inset,
-		Size = UDim2.new(1, 0, 1, 0),
-		Parent = KeybindOuter
-	})
-	Library:Create('Frame', {
-		BackgroundColor3 = "Accent";
-		BorderSizePixel = 0;
-		Size = UDim2.new(1, 0, 0, 2);
-		Parent = KeybindInner;
-	});
+    local KeyList = {
+        Keybinds = {}
+    }
+    local Dragging = {
+        false,
+        UDim2.new(0, 0, 0, 0)
+    }
+    Library.KeyList = KeyList
+    local KeybindOuter = Library:Create('Frame', {
+        AnchorPoint = Vector2.new(0, 0.5),
+        BorderColor3 = Color3.new(0, 0, 0),
+        Position = UDim2.new(0, 10, 0.5, 0),
+        Size = UDim2.new(0, 50, 0, 20),
+        Visible = false,
+        Parent = Library.ScreenGui
+    })
+    local KeybindInner = Library:Create('Frame', {
+        BackgroundColor3 = "MainColor",
+        BorderColor3 = "OutlineColor",
+        BorderMode = Enum.BorderMode.Inset,
+        Size = UDim2.new(1, 0, 1, 0),
+        Parent = KeybindOuter
+    })
+    Library:Create('Frame', {
+        BackgroundColor3 = "Accent";
+        BorderSizePixel = 0;
+        Size = UDim2.new(1, 0, 0, 2);
+        Parent = KeybindInner;
+    });
+	local Highlight = Library:Create('Frame', {
+        Parent = KeybindOuter,
+        Size = UDim2.new(1, 10, 1, 10),
+        Position = UDim2.new(0, -5, 0, -5),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+        BackgroundTransparency = 0.9,
+        ZIndex = -1
+    })
+	Library:ApplyUICorner(Highlight, 6)
 	local KeybindLabel = Library:Create('TextButton', {
 		Size = UDim2.new(1, 0, 0, 20),
 		Position = UDim2.fromOffset(5, 2),
@@ -738,6 +757,51 @@ function Library:KeybindList()
 	end
 	return KeyList
 end
+function Library:CreateWatermark()
+    local Watermark = Library:Create('Frame', {
+        Parent = Library.ScreenGui,
+        Position = UDim2.new(0, 10, 0, 10),
+        Size = UDim2.new(0, 200, 0, 50),
+        BackgroundColor3 = "MainColor",
+        BorderColor3 = "OutlineColor",
+        AnchorPoint = Vector2.new(0, 0),
+        ZIndex = 100
+    })
+    Library:ApplyUICorner(Watermark, 8)
+
+    local Title = Library:Create('TextLabel', {
+        Parent = Watermark,
+        Position = UDim2.new(0, 10, 0, 5),
+        Size = UDim2.new(1, -20, 0, 20),
+        BackgroundTransparency = 1,
+        Text = "Pasta.lua",
+        TextColor3 = "FontColor",
+        FontFace = Library.Font,
+        TextSize = 16,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    local FPSLabel = Library:Create('TextLabel', {
+        Parent = Watermark,
+        Position = UDim2.new(0, 10, 0, 25),
+        Size = UDim2.new(1, -20, 0, 20),
+        BackgroundTransparency = 1,
+        Text = "FPS: 0",
+        TextColor3 = "FontColor",
+        FontFace = Library.Font,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+
+    task.spawn(function()
+        while task.wait(0.1) do
+            local fps = math.floor(1 / task.wait())
+            FPSLabel.Text = "FPS: " .. fps
+        end
+    end)
+end
+
+Library:CreateWatermark()
 --
 function Library:LoadConfigTab(Window)
 	local Config = Window:Page({
