@@ -613,6 +613,10 @@ function Library:CreateWatermark()
         end
     end)
 
+    function Watermark:SetVisible(state)
+        self.Visible = state
+    end
+
     return Watermark
 end
 function Library:KeybindList()
@@ -1083,21 +1087,21 @@ function Library:LoadConfigTab(Window)
 			Callback = Library.SetOpen
 		})
 		Menu:Toggle({
-			Name = "Show Watermark",
-			Flag = "Watermark",
-			State = false, -- Default state is off
-			Callback = function(state)
-				if Library.Watermark then
-					Library.Watermark.Visible = state
-				end
+			Name = "Keybind List",
+			Flag = "KeybindList",
+			Callback = function(v)
+				Library.KeyList:SetVisible(v)
 			end
 		})
 		Menu:Toggle({
 			Name = "Show Watermark",
+			Flag = "Watermark",
 			State = false,
 			Callback = function(state)
-				Watermark.Visible = state
-			end,
+				if Library.Watermark then
+					Library.Watermark:SetVisible(state)
+				end
+			end
 		})
 		Menu:Button({
 			Name = "Unload",
