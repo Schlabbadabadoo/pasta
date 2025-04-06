@@ -604,17 +604,17 @@ function Library:KeybindList()
         BorderColor3 = "OutlineColor"
     })
 
-    local KeybindInner = Library:Create('Frame', {
-        BackgroundColor3 = "MainColor",
-        BorderColor3 = "OutlineColor",
-        BorderMode = Enum.BorderMode.Inset,
-        Size = UDim2.new(1, 0, 1, 0),
-        Parent = KeybindOuter
-    })
-    Library:AddToThemeObjects(KeybindInner, {
-        BackgroundColor3 = "MainColor",
-        BorderColor3 = "OutlineColor"
-    })
+	local KeybindInner = Library:Create('Frame', {
+		BackgroundColor3 = "MainColor",
+		BorderColor3 = "OutlineColor",
+		BorderMode = Enum.BorderMode.Inset,
+		Size = UDim2.new(1, 0, 1, 0),
+		Parent = KeybindOuter
+	})
+	Library:AddToThemeObjects(KeybindInner, {
+		BackgroundColor3 = "MainColor",
+		BorderColor3 = "OutlineColor"
+	})
 
     Library:Create('Frame', {
         BackgroundColor3 = "Accent",
@@ -622,7 +622,15 @@ function Library:KeybindList()
         Size = UDim2.new(1, 0, 0, 2),
         Parent = KeybindInner
     })
-
+	local HighlightBar = Library:Create('Frame', {
+		BackgroundColor3 = "Accent",
+		BorderSizePixel = 0,
+		Size = UDim2.new(1, 0, 0, 2), -- Adjust height as needed
+		Parent = KeybindInner
+	})
+	Library:AddToThemeObjects(HighlightBar, {
+		BackgroundColor3 = "Accent"
+	})
     -- Keybind label
     local KeybindLabel = Library:Create('TextButton', {
         Size = UDim2.new(1, 0, 0, 20),
