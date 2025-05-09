@@ -136,7 +136,7 @@ Library.RoundedCornersFrame = nil  -- Reference to the frame (e.g., Window or Sc
 
 function Library:ToggleRoundedCorners(value)
     Library.RoundedCornersToggle = value
-    if Library.Window and Library.Window:IsA("Frame") then  -- Assuming Window is the main frame
+    if Library.Window and typeof(Library.Window) == "Instance" and Library.Window:IsA("Frame") then  -- Safe check for Instance
         if value then
             -- Apply rounded corners
             local uicorner = Instance.new("UICorner")
@@ -162,6 +162,9 @@ function Library:ToggleRoundedCorners(value)
                 highlightImage.Visible = true
             end
         end
+    else
+        warn("Library.Window is not a valid Frame instance. Rounded corners toggle skipped.")
+        -- You might want to add logic here to handle this case, like initializing Library.Window if possible
     end
 end
 
