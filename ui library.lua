@@ -68,6 +68,7 @@ local Library = {
 	};
 	Connections = {};
 	HookedFunctions = {};
+	ChangedUpValues = {};
 	Font = nil;
 	FontSize = 12;
 	Notifs = {};
@@ -128,6 +129,45 @@ local Data = {
 writefile(Library.Folder .. "ProggyClean.font", httpserv:JSONEncode(Data))
 
 Library.Font = Font.new(getcustomasset(Library.Folder .. "ProggyClean.font"))
+
+-- Add toggle for rounded corners and highlight.jpg management
+Library.RoundedCornersToggle = false  -- Default state
+Library.RoundedCornersFrame = nil  -- Reference to the frame (e.g., Window or ScreenGUI frame)
+
+function Library:ToggleRoundedCorners(value)
+    Library.RoundedCornersToggle = value
+    if Library.Window and Library.Window:IsA("Frame") then  -- Assuming Window is the main frame
+        if value then
+            -- Apply rounded corners
+            local uicorner = Instance.new("UICorner")
+            uicorner.CornerRadius = UDim.new(0, 12)  -- Adjust radius as needed
+            uicorner.Parent = Library.Window
+            
+            -- Disable highlight.jpg (assuming it's an ImageLabel; adjust if needed)
+            local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
+            if highlightImage and highlightImage:IsA("ImageLabel") then
+                highlightImage.Visible = false
+            end
+            Library.RoundedCornersFrame = uicorner  -- Store for later removal
+        else
+            -- Remove rounded corners
+            if Library.RoundedCornersFrame then
+                Library.RoundedCornersFrame:Destroy()
+                Library.RoundedCornersFrame = nil
+            end
+            
+            -- Re-enable highlight.jpg
+            local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
+            if highlightImage and highlightImage:IsA("ImageLabel") then
+                highlightImage.Visible = true
+            end
+        end
+    end
+end
+
+-- Example: Add a way to toggle this, e.g., in a section or directly
+-- You can call this function from a UI toggle elsewhere in your code
+
 -- // Functions
 function Library:GetDarkerColor(Color)
 	local H, S, V = Color:ToHSV()
@@ -211,12 +251,36 @@ function Library:RestoreFunction(Function)
 	end
 end
 
+function Library:SetUpValue(UpValueFunction, UpValueNumber, NewUpValue)
+	local UpValue = getupvalue(UpValueFunction, UpValueNumber)
+	setupvalue(UpValueFunction, UpValueNumber, NewUpValue)
+	Library.ChangedUpValues[UpValueFunction] = {UpValueNumber, UpValue}
+	return UpValue
+end
+
+function Library:RestoreUpValue(UpValueFunction, UpValue)
+	for UpValueFunc, Table in Library.ChangedUpValues do
+		if UpValueFunc == UpValueFunction and Table[1] == UpValue then
+			setupvalue(UpValueFunction, Table[1], Table[2])
+			UpValueFunc = nil
+			break
+		end
+	end
+	if not table.find(Library.HookedFunctions, UpValueFunction) then
+		restorefunction(UpValueFunction)
+	end
+end
+
 function Library:Unload()
 	Library:SetOpen()
 	Library.KeyList:SetVisible(false)
 	task.wait(0.2)
 	for _, v in ipairs(Library.Connections) do
 		v:Disconnect()
+	end
+	for UpValueFunc, Table in Library.ChangedUpValues do
+		setupvalue(UpValueFunc, Table[1], Table[2])
+		restorefunction(UpValueFunc)
 	end
 	for _, v in next, Library.HookedFunctions do
 		if isfunctionhooked(v) then
@@ -786,60 +850,75 @@ function Library:LoadConfigTab(Window)
 				CFGList:Set(SelectedConfig)
 			end
 		end
-		PresetThemes:Dropdown({
-			Name = "Presets",
-			Flag = "UI/Presets",
-			Options = {
-				"Tokyo Night",
-				"Kanagawa",						
-				"Quartz",
-				"BBot",
-				"Fatality",
-				"Jester",
-				"Mint",
-				"Ubuntu",
-				"Abyss",
-				"Neverlose",
-				"Aimware",
-				"Youtube",
-				"Gamesense",
-				"Onetap",
-				"Entropy",
-				"Interwebz",
-				"Dracula",
-				"Spotify",
-				"Sublime",
-				"Vape",
-				"Neko",
-				"Corn",
-				"Minecraft",
-				"Nord",
-				"Monokai",
-				"Cyberpunk",
-				"Solarized Dark",
-				"Gruvbox",
-				"Night Owl",
-				"Arc Dark",
-				"Catppuccin",
-				"Tomorrow Night",
-				"Molokai",
-				"Material Palenight",
-				"Oceanic Next",
-				"Spacegray",
-				"PaperColor Dark",
-				"Edge",
-				"One Dark",
-				"Tokyo Dark"
-			},
-			State = "Tokyo Night",
-			Callback = function(v)
-				local themes = {
-					["Tokyo Night"] = {
-						FontColor = "#c0caf5",
-						MainColor = "#1a1b26",
-						Accent = "#7778ff",
-						BackgroundColor = "#16161e",
-						OutlineColor = "#000000"
+PresetThemes:Dropdown({
+	Name = "Presets",
+	Flag = "UI/Presets",
+	Options = {
+		"Tokyo Night",
+		"Kanagawa",						
+		"Quartz",
+		"BBot",
+		"Fatality",
+		"Jester",
+		"Mint",
+		"Ubuntu",
+		"Abyss",
+		"Neverlose",
+		"Aimware",
+		"Youtube",
+		"Gamesense",
+		"Onetap",
+		"Entropy",
+		"Interwebz",
+		"Dracula",
+		"Spotify",
+		"Sublime",
+		"Vape",
+		"Neko",
+		"Corn",
+		"Minecraft",
+		"Nord",
+		"Monokai",
+		"Cyberpunk",
+		"Solarized Dark",
+		"Gruvbox",
+		"Night Owl",
+		"Arc Dark",
+		"Catppuccin",
+		"Tomorrow Night",
+		"Molokai",
+		"Material Palenight",
+		"Oceanic Next",
+		"Spacegray",
+		"PaperColor Dark",
+		"Edge",
+		"One Dark",
+		"Tokyo Dark",
+		"DOS",
+		"CRT Green",
+		"Matrix",
+		"Old Terminal",
+		"Midnight Retro",
+		"Neo Noir",
+		"Dark Cherry",
+		"Vintage Code",
+		"Oblivion",
+		"Nocturne",
+		"Zerox",
+		"Void",
+		"Carbon",
+		"Black Ice",
+		"Terminal Wave"
+	},
+	State = "Tokyo Night",
+	Callback = function(v)
+		local themes = {
+					['Tokyo Night'] = {
+			                        FontColor = "#FFFFFF",
+			                        MainColor = "#191925",
+			                        Accent = "#6759B3",
+			                        BackgroundColor = "#16161F",
+			                        OutlineColor = "#323232"
 					},
 					Kanagawa = {
 						FontColor = "#dcd7ba",
@@ -1113,6 +1192,111 @@ function Library:LoadConfigTab(Window)
 						Accent = "#9aa5ce",
 						BackgroundColor = "#0d0d15",
 						OutlineColor = "#000000"
+					},
+					["DOS"] = {
+						FontColor = "#00FF00",
+						MainColor = "#000000",
+						Accent = "#00AA00",
+						BackgroundColor = "#000000",
+						OutlineColor = "#222222"
+					},
+					["CRT Green"] = {
+						FontColor = "#7FFF00",
+						MainColor = "#101010",
+						Accent = "#00FF00",
+						BackgroundColor = "#050505",
+						OutlineColor = "#1A1A1A"
+					},
+					["Matrix"] = {
+						FontColor = "#00FF00",
+						MainColor = "#0A0A0A",
+						Accent = "#00CC66",
+						BackgroundColor = "#000000",
+						OutlineColor = "#0F0F0F"
+					},
+					["Old Terminal"] = {
+						FontColor = "#00DD00",
+						MainColor = "#111111",
+						Accent = "#00AA00",
+						BackgroundColor = "#000000",
+						OutlineColor = "#2F2F2F"
+					},
+					["Midnight Retro"] = {
+						FontColor = "#FF9EFF",
+						MainColor = "#0F0F1F",
+						Accent = "#9D00FF",
+						BackgroundColor = "#0A0A1A",
+						OutlineColor = "#1C1C2C"
+					},
+					["Neo Noir"] = {
+						FontColor = "#FF3366",
+						MainColor = "#1A1A1A",
+						Accent = "#C50052",
+						BackgroundColor = "#121212",
+						OutlineColor = "#2A2A2A"
+					},
+					["Dark Cherry"] = {
+						FontColor = "#FFE6F0",
+						MainColor = "#2B0B0B",
+						Accent = "#A30000",
+						BackgroundColor = "#1A0000",
+						OutlineColor = "#3B1C1C"
+					},
+					["Vintage Code"] = {
+						FontColor = "#F4ECD8",
+						MainColor = "#1B1B1B",
+						Accent = "#CC5500",
+						BackgroundColor = "#141414",
+						OutlineColor = "#333333"
+					},
+					["Oblivion"] = {
+						FontColor = "#E0E0E0",
+						MainColor = "#202020",
+						Accent = "#F92672",
+						BackgroundColor = "#121212",
+						OutlineColor = "#2E2E2E"
+					},
+					["Nocturne"] = {
+						FontColor = "#DADADA",
+						MainColor = "#121217",
+						Accent = "#A3D2FF",
+						BackgroundColor = "#0C0C10",
+						OutlineColor = "#1A1A1F"
+					},
+					["Zerox"] = {
+						FontColor = "#FFFFFF",
+						MainColor = "#181818",
+						Accent = "#AA00FF",
+						BackgroundColor = "#0F0F0F",
+						OutlineColor = "#2C2C2C"
+					},
+					["Void"] = {
+						FontColor = "#DDDDDD",
+						MainColor = "#0A0A0A",
+						Accent = "#6600CC",
+						BackgroundColor = "#000000",
+						OutlineColor = "#1A1A1A"
+					},
+					["Carbon"] = {
+						FontColor = "#E0E0E0",
+						MainColor = "#2A2A2A",
+						Accent = "#999999",
+						BackgroundColor = "#1A1A1A",
+						OutlineColor = "#383838"
+					},
+					["Black Ice"] = {
+						FontColor = "#CFCFCF",
+						MainColor = "#0E0E10",
+						Accent = "#34BFFF",
+						BackgroundColor = "#08080A",
+						OutlineColor = "#1C1C1F"
+					},
+					["Terminal Wave"] = {
+						FontColor = "#8AFFEF",
+						MainColor = "#14191F",
+						Accent = "#F92672",
+						BackgroundColor = "#0B0F14",
+						OutlineColor = "#1E252E"
 					}
 				}
 
