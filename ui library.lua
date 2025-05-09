@@ -147,6 +147,8 @@ function Library:ToggleRoundedCorners(value)
             local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
             if highlightImage and highlightImage:IsA("ImageLabel") then
                 highlightImage.Visible = false
+            else
+                warn("Highlight image not found or is not an ImageLabel.")
             end
             Library.RoundedCornersFrame = uicorner  -- Store for later removal
         else
@@ -160,11 +162,12 @@ function Library:ToggleRoundedCorners(value)
             local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
             if highlightImage and highlightImage:IsA("ImageLabel") then
                 highlightImage.Visible = true
+            else
+                warn("Highlight image not found or is not an ImageLabel.")
             end
         end
     else
         warn("Library.Window is not a valid Frame instance. Rounded corners toggle skipped.")
-        -- You might want to add logic here to handle this case, like initializing Library.Window if possible
     end
 end
 
