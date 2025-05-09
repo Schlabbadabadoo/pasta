@@ -1385,6 +1385,13 @@ PresetThemes:Dropdown({
 				Library.KeyList:SetVisible(v)
 			end
 		})
+		Menu:Toggle({
+			Name = "Rounded Corners",
+			Flag = "RoundedCorners",
+			Callback = function(v)
+				Library:ToggleRoundedCorners(v)
+			end
+		})
 		Menu:Button({
 			Name = "Unload",
 			Callback = function()
