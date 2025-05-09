@@ -130,50 +130,6 @@ writefile(Library.Folder .. "ProggyClean.font", httpserv:JSONEncode(Data))
 
 Library.Font = Font.new(getcustomasset(Library.Folder .. "ProggyClean.font"))
 
--- Add toggle for rounded corners and highlight.jpg management
-Library.RoundedCornersToggle = false  -- Default state
-Library.RoundedCornersFrame = nil  -- Reference to the frame (e.g., Window or ScreenGUI frame)
-
-function Library:ToggleRoundedCorners(value)
-    Library.RoundedCornersToggle = value
-    if Library.Window and typeof(Library.Window) == "Instance" and Library.Window:IsA("Frame") then  -- Safe check for Instance
-        if value then
-            -- Apply rounded corners
-            local uicorner = Instance.new("UICorner")
-            uicorner.CornerRadius = UDim.new(0, 12)  -- Adjust radius as needed
-            uicorner.Parent = Library.Window
-            
-            -- Disable highlight.jpg (assuming it's an ImageLabel; adjust if needed)
-            local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
-            if highlightImage and highlightImage:IsA("ImageLabel") then
-                highlightImage.Visible = false
-            else
-                warn("Highlight image not found or is not an ImageLabel.")
-            end
-            Library.RoundedCornersFrame = uicorner  -- Store for later removal
-        else
-            -- Remove rounded corners
-            if Library.RoundedCornersFrame then
-                Library.RoundedCornersFrame:Destroy()
-                Library.RoundedCornersFrame = nil
-            end
-            
-            -- Re-enable highlight.jpg
-            local highlightImage = Library.Window:FindFirstChild("HighlightImage")  -- Replace with actual name if different
-            if highlightImage and highlightImage:IsA("ImageLabel") then
-                highlightImage.Visible = true
-            else
-                warn("Highlight image not found or is not an ImageLabel.")
-            end
-        end
-    else
-        warn("Library.Window is not a valid Frame instance. Rounded corners toggle skipped.")
-    end
-end
-
--- Example: Add a way to toggle this, e.g., in a section or directly
--- You can call this function from a UI toggle elsewhere in your code
-
 -- // Functions
 function Library:GetDarkerColor(Color)
 	local H, S, V = Color:ToHSV()
@@ -1391,13 +1347,19 @@ PresetThemes:Dropdown({
 				Library.KeyList:SetVisible(v)
 			end
 		})
+
 		Menu:Toggle({
-			Name = "Rounded Corners",
-			Flag = "RoundedCorners",
+			Name = "Watermark",
+			Flag = "Watermark",
 			Callback = function(v)
-				Library:ToggleRoundedCorners(v)
+				if v then
+					Library:ShowWatermark()  -- Call a function to show the watermark
+				else
+					Library:HideWatermark()  -- Call a function to hide the watermark
+				end
 			end
 		})
+
 		Menu:Button({
 			Name = "Unload",
 			Callback = function()
@@ -4036,5 +3998,52 @@ do
 		end
 		return Label
 	end
+
+	-- Function to show the watermark
+	function Library:ShowWatermark()
+		-- Create a Frame for the watermark
+		local watermarkFrame = Instance.new("Frame")
+		watermarkFrame.Size = UDim2.new(0, 200, 0, 50)  -- Adjust size as needed
+		watermarkFrame.Position = UDim2.new(0.5, -100, 0, 0)  -- Centered at the top
+		watermarkFrame.BackgroundTransparency = 0.5
+		watermarkFrame.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")  -- Adjust to your GUI structure
+
+		-- Create a TextLabel for displaying FPS and Ping
+		local watermarkLabel = Instance.new("TextLabel")
+		watermarkLabel.Size = UDim2.new(1, 0, 1, 0)
+		watermarkLabel.BackgroundTransparency = 1
+		watermarkLabel.TextColor3 = Color3.new(1, 1, 1)  -- White text
+		watermarkLabel.TextScaled = true
+		watermarkLabel.Parent = watermarkFrame
+
+		-- Update the watermark with FPS and Ping
+		local function updateWatermark()
+			local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())  -- Simple FPS calculation
+			local ping = game:GetService("Players").LocalPlayer:GetNetworkPing()  -- Get network ping
+			watermarkLabel.Text = "FPS: " .. fps .. " | Ping: " .. ping .. "ms"
+		end
+
+		-- Connect the update function to RenderStepped
+		local connection
+		connection = game:GetService("RunService").RenderStepped:Connect(function()
+			updateWatermark()
+		end)
+
+		-- Store the connection to disconnect later
+		watermarkFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+			if not watermarkFrame.Visible then
+				connection:Disconnect()
+			end
+		end)
+	end
+
+	-- Function to hide the watermark
+	function Library:HideWatermark()
+		local watermarkFrame = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui"):FindFirstChild("WatermarkFrame")
+		if watermarkFrame then
+			watermarkFrame.Visible = false
+		end
+	end
+
 	return Library
 end
