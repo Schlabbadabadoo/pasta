@@ -4006,7 +4006,7 @@ do
 		watermarkFrame.Size = UDim2.new(0, 200, 0, 50)  -- Adjust size as needed
 		watermarkFrame.Position = UDim2.new(0.5, -100, 0, 0)  -- Centered at the top
 		watermarkFrame.BackgroundTransparency = 0.5
-		watermarkFrame.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")  -- Adjust to your GUI structure
+		watermarkFrame.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")  -- Ensure ScreenGui exists
 
 		-- Create a TextLabel for displaying FPS and Ping
 		local watermarkLabel = Instance.new("TextLabel")
@@ -4018,7 +4018,7 @@ do
 
 		-- Update the watermark with FPS and Ping
 		local function updateWatermark()
-			local fps = math.floor(1 / game:GetService("RunService").RenderStepped:Wait())  -- Simple FPS calculation
+			local fps = math.floor(1 / (game:GetService("RunService").RenderStepped:Wait() or 0.001))  -- Simple FPS calculation
 			local ping = game:GetService("Players").LocalPlayer:GetNetworkPing()  -- Get network ping
 			watermarkLabel.Text = "FPS: " .. fps .. " | Ping: " .. ping .. "ms"
 		end
@@ -4042,6 +4042,8 @@ do
 		local watermarkFrame = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui"):FindFirstChild("WatermarkFrame")
 		if watermarkFrame then
 			watermarkFrame.Visible = false
+		else
+			warn("Watermark frame not found.")
 		end
 	end
 
