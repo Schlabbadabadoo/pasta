@@ -17,6 +17,7 @@ local Library = {
 	RegistryMap = {};
 	Toggles = {};
 	ScreenGui = nil;
+	IsLoaded = false;
 	Keys = {
 		[Enum.KeyCode.LeftShift] = "LShift",
 		[Enum.KeyCode.RightShift] = "RShift",
@@ -129,7 +130,6 @@ local Data = {
 writefile(Library.Folder .. "ProggyClean.font", httpserv:JSONEncode(Data))
 
 Library.Font = Font.new(getcustomasset(Library.Folder .. "ProggyClean.font"))
-
 -- // Functions
 function Library:GetDarkerColor(Color)
 	local H, S, V = Color:ToHSV()
@@ -154,39 +154,55 @@ function Library:TweenProperty(object, property, endValue, duration)
 	return tween
 end
 function Library:Create(Class, Properties, Secure)
-	local instance = Instance.new(Class)
-	
-	if Secure then
-		ProtectGui(instance)
-	end
-	
-	local colorMapping = {
-		FontColor = Library.FontColor,
-		Accent = Library.Accent,
-		DarkerAccent = Library.DarkerAccent,
-		OutlineColor = Library.OutlineColor,
-		MainColor = Library.MainColor,
-		BackgroundColor = Library.BackgroundColor
-	}
-	
-	local themeProperties = {}
-	
-	for Property, Value in pairs(Properties) do
-		local resolvedValue = Value
-		
-		if typeof(Value) == "string" and colorMapping[Value] then
-			resolvedValue = colorMapping[Value]
-			themeProperties[Property] = Value
-		end
-		
-		instance[Property] = resolvedValue
-	end
-	
-	if next(themeProperties) then
-		Library:AddToThemeObjects(instance, themeProperties)
-	end
-	
-	return instance
+    local instance = Instance.new(Class)
+    
+    if Secure then
+        ProtectGui(instance)
+    end
+    
+    local colorMapping = {
+        FontColor = Library.FontColor,
+        Accent = Library.Accent,
+        DarkerAccent = Library.DarkerAccent,
+        OutlineColor = Library.OutlineColor,
+        MainColor = Library.MainColor,
+        BackgroundColor = Library.BackgroundColor
+    }
+    
+    local themeProperties = {}
+    
+    for Property, Value in pairs(Properties) do
+        local resolvedValue = Value
+        
+        if typeof(Value) == "string" and colorMapping[Value] then
+            resolvedValue = colorMapping[Value]
+            themeProperties[Property] = Value
+        end
+        
+        instance[Property] = resolvedValue
+    end
+
+    -- Add rounded corners to supported GUI objects
+    local roundedClasses = {
+        ["Frame"] = true,
+        ["TextButton"] = true,
+        ["TextLabel"] = true,
+        ["ImageLabel"] = true,
+        ["ScrollingFrame"] = true,
+        ["TextBox"] = true,
+        ["ImageButton"] = true,
+    }
+    if roundedClasses[Class] then
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = Library.CornerRadius
+        corner.Parent = instance
+    end
+
+    if next(themeProperties) then
+        Library:AddToThemeObjects(instance, themeProperties)
+    end
+    
+    return instance
 end
 
 function Library:Connection(Signal, Callback)
@@ -765,721 +781,6 @@ function Library:KeybindList()
 	return KeyList
 end
 --
-function Library:LoadConfigTab(Window)
-	local Config = Window:Page({
-		Name = "Settings"
-	})
-	do
-		local Menu = Config:Section({
-			Name = "Menu"
-		})
-		local PresetThemes = Config:Section({
-			Name = "Preset Themes"
-		})
-		local Themes = Config:Section({
-			Name = "Themes Configuration"
-		})
-		local Cfgs = Config:Section({
-			Name = "Configs",
-			Side = "Right"
-		})
-		local CurrentList = {}
-		local CFGList, loadedcfgshit, autoloadlabel, randomfunc, maincolor, backgroundcolor, outlinecolor, fontcolor, accentcolor
-		local function UpdateConfigList()
-			local List = {}
-			local SelectedConfig = Library.Flags["SettingConfigurationList"]
-			for _, file in ipairs(listfiles(ConfigFolder .. "/configs")) do
-				local FileName = file:gsub("\\", "/")
-				FileName = FileName:match("([^/]+)$")
-				List[#List + 1] = FileName
-			end
-			
-			local IsNew = #List ~= #CurrentList
-			if not IsNew then
-				for idx, file in ipairs(List) do
-					if file ~= CurrentList[idx] then
-						IsNew = true
-						break
-					end
-				end
-			end
-			if IsNew then
-				CurrentList = List
-				CFGList:Refresh(CurrentList)
-			end
-			if SelectedConfig then
-				randomfunc:set("")
-				CFGList:Set(SelectedConfig)
-			end
-		end
-PresetThemes:Dropdown({
-	Name = "Presets",
-	Flag = "UI/Presets",
-	Options = {
-		"Tokyo Night",
-		"Kanagawa",						
-		"Quartz",
-		"BBot",
-		"Fatality",
-		"Jester",
-		"Mint",
-		"Ubuntu",
-		"Abyss",
-		"Neverlose",
-		"Aimware",
-		"Youtube",
-		"Gamesense",
-		"Onetap",
-		"Entropy",
-		"Interwebz",
-		"Dracula",
-		"Spotify",
-		"Sublime",
-		"Vape",
-		"Neko",
-		"Corn",
-		"Minecraft",
-		"Nord",
-		"Monokai",
-		"Cyberpunk",
-		"Solarized Dark",
-		"Gruvbox",
-		"Night Owl",
-		"Arc Dark",
-		"Catppuccin",
-		"Tomorrow Night",
-		"Molokai",
-		"Material Palenight",
-		"Oceanic Next",
-		"Spacegray",
-		"PaperColor Dark",
-		"Edge",
-		"One Dark",
-		"Tokyo Dark",
-		"DOS",
-		"CRT Green",
-		"Matrix",
-		"Old Terminal",
-		"Midnight Retro",
-		"Neo Noir",
-		"Dark Cherry",
-		"Vintage Code",
-		"Oblivion",
-		"Nocturne",
-		"Zerox",
-		"Void",
-		"Carbon",
-		"Black Ice",
-		"Terminal Wave"
-	},
-	State = "Tokyo Night",
-	Callback = function(v)
-		local themes = {
-					['Tokyo Night'] = {
-			                        FontColor = "#FFFFFF",
-			                        MainColor = "#191925",
-			                        Accent = "#6759B3",
-			                        BackgroundColor = "#16161F",
-			                        OutlineColor = "#323232"
-					},
-					Kanagawa = {
-						FontColor = "#dcd7ba",
-						MainColor = "#1f1f28",
-						Accent = "#957fb8",
-						BackgroundColor = "#1a1a22",
-						OutlineColor = "#000000"
-					},						
-					Quartz = {
-						FontColor = "#ffffff",
-						MainColor = "#2e2e2e",
-						Accent = "#9147ff",
-						BackgroundColor = "#1c1c1c",
-						OutlineColor = "#000000"
-					},
-					BBot = {
-						FontColor = "#ffffff",
-						MainColor = "#2d2d2d",
-						Accent = "#3a9bfd",
-						BackgroundColor = "#1a1a1a",
-						OutlineColor = "#000000"
-					},
-					Fatality = {
-						FontColor = "#ffffff",
-						MainColor = "#191919",
-						Accent = "#e61c1c",
-						BackgroundColor = "#0f0f0f",
-						OutlineColor = "#000000"
-					},
-					Jester = {
-						FontColor = "#ffffff",
-						MainColor = "#292929",
-						Accent = "#ff00ff",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Mint = {
-						FontColor = "#ffffff",
-						MainColor = "#2a2a2a",
-						Accent = "#78ffd6",
-						BackgroundColor = "#1f1f1f",
-						OutlineColor = "#000000"
-					},
-					Ubuntu = {
-						FontColor = "#eeeeee",
-						MainColor = "#2c001e",
-						Accent = "#e95420",
-						BackgroundColor = "#300a24",
-						OutlineColor = "#000000"
-					},
-					Abyss = {
-						FontColor = "#dcdcdc",
-						MainColor = "#1c1c1c",
-						Accent = "#5e81ac",
-						BackgroundColor = "#101010",
-						OutlineColor = "#000000"
-					},
-					Neverlose = {
-						FontColor = "#f2f2f2",
-						MainColor = "#1e1e1e",
-						Accent = "#5fa8d3",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Aimware = {
-						FontColor = "#ffffff",
-						MainColor = "#2d2d2d",
-						Accent = "#e62e2e",
-						BackgroundColor = "#1a1a1a",
-						OutlineColor = "#000000"
-					},
-					Youtube = {
-						FontColor = "#ffffff",
-						MainColor = "#282828",
-						Accent = "#ff0000",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Gamesense = {
-						FontColor = "#b4b4b4",
-						MainColor = "#1a1a1a",
-						Accent = "#5eb95e",
-						BackgroundColor = "#101010",
-						OutlineColor = "#000000"
-					},
-					Onetap = {
-						FontColor = "#ffffff",
-						MainColor = "#232323",
-						Accent = "#2e8bff",
-						BackgroundColor = "#141414",
-						OutlineColor = "#000000"
-					},
-					Entropy = {
-						FontColor = "#e0e0e0",
-						MainColor = "#2a2a2a",
-						Accent = "#b16286",
-						BackgroundColor = "#1a1a1a",
-						OutlineColor = "#000000"
-					},
-					Interwebz = {
-						FontColor = "#ffffff",
-						MainColor = "#292929",
-						Accent = "#e600ff",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Dracula = {
-						FontColor = "#f8f8f2",
-						MainColor = "#282a36",
-						Accent = "#bd93f9",
-						BackgroundColor = "#1e1f29",
-						OutlineColor = "#000000"
-					},
-					Spotify = {
-						FontColor = "#ffffff",
-						MainColor = "#191414",
-						Accent = "#1db954",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Sublime = {
-						FontColor = "#f8f8f2",
-						MainColor = "#2b2b2b",
-						Accent = "#66d9ef",
-						BackgroundColor = "#1e1e1e",
-						OutlineColor = "#000000"
-					},
-					Vape = {
-						FontColor = "#ffffff",
-						MainColor = "#1f1f1f",
-						Accent = "#8c52ff",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Neko = {
-						FontColor = "#ffffff",
-						MainColor = "#2d2a55",
-						Accent = "#ff77a8",
-						BackgroundColor = "#1b1b3a",
-						OutlineColor = "#000000"
-					},
-					Corn = {
-						FontColor = "#DCDCDC",
-						MainColor = "#252525",
-						Accent = "#FF9000",
-						BackgroundColor = "#191919",
-						OutlineColor = "#000000"
-					},
-					Minecraft = {
-						FontColor = "#FFFFFF",
-						MainColor = "#333333",
-						Accent = "#27CE40",
-						BackgroundColor = "#262626",
-						OutlineColor = "#000000"
-					},
-					Nord = {
-						FontColor = "#D8DEE9",
-						MainColor = "#2E3440",
-						Accent = "#88C0D0",
-						BackgroundColor = "#3B4252",
-						OutlineColor = "#4C566A"
-					},
-					Monokai = {
-						FontColor = "#F8F8F2",
-						MainColor = "#272822",
-						Accent = "#FD971F",
-						BackgroundColor = "#1E1F1C",
-						OutlineColor = "#75715E"
-					},
-					Cyberpunk = {
-						FontColor = "#FF66C4",
-						MainColor = "#0D0221",
-						Accent = "#00FFFF",
-						BackgroundColor = "#1A0033",
-						OutlineColor = "#4A0072"
-					},
-					["Solarized Dark"] = {
-						FontColor = "#EEE8D5",
-						MainColor = "#002B36",
-						Accent = "#268BD2",
-						BackgroundColor = "#073642",
-						OutlineColor = "#586E75"
-					},
-					Gruvbox = {
-						FontColor = "#EBDBB2",
-						MainColor = "#282828",
-						Accent = "#FE8019",
-						BackgroundColor = "#1D2021",
-						OutlineColor = "#3C3836"
-					},
-					["Night Owl"] = {
-						FontColor = "#d6deeb",
-						MainColor = "#011627",
-						Accent = "#82AAFF",
-						BackgroundColor = "#0f111a",
-						OutlineColor = "#000000"
-					},
-					["Arc Dark"] = {
-						FontColor = "#ffffff",
-						MainColor = "#383c4a",
-						Accent = "#5294e2",
-						BackgroundColor = "#2f343f",
-						OutlineColor = "#000000"
-					},
-					Catppuccin = {
-						FontColor = "#cdd6f4",
-						MainColor = "#1e1e2e",
-						Accent = "#89b4fa",
-						BackgroundColor = "#181825",
-						OutlineColor = "#000000"
-					},
-					["Tomorrow Night"] = {
-						FontColor = "#cccccc",
-						MainColor = "#1d1f21",
-						Accent = "#81a2be",
-						BackgroundColor = "#282a2e",
-						OutlineColor = "#000000"
-					},
-					Molokai = {
-						FontColor = "#f8f8f2",
-						MainColor = "#1b1d1e",
-						Accent = "#fd971f",
-						BackgroundColor = "#272822",
-						OutlineColor = "#000000"
-					},
-					["Material Palenight"] = {
-						FontColor = "#c3e88d",
-						MainColor = "#292d3e",
-						Accent = "#82aaff",
-						BackgroundColor = "#1e212e",
-						OutlineColor = "#000000"
-					},
-					["Oceanic Next"] = {
-						FontColor = "#d8dee9",
-						MainColor = "#1b2b34",
-						Accent = "#6699cc",
-						BackgroundColor = "#0f1c26",
-						OutlineColor = "#000000"
-					},
-					Spacegray = {
-						FontColor = "#ffffff",
-						MainColor = "#20242b",
-						Accent = "#b3b3b3",
-						BackgroundColor = "#2c2f36",
-						OutlineColor = "#000000"
-					},
-					["PaperColor Dark"] = {
-						FontColor = "#eeeeee",
-						MainColor = "#1c1c1c",
-						Accent = "#af5f5f",
-						BackgroundColor = "#121212",
-						OutlineColor = "#000000"
-					},
-					Edge = {
-						FontColor = "#ffffff",
-						MainColor = "#262a33",
-						Accent = "#528bff",
-						BackgroundColor = "#1c1f26",
-						OutlineColor = "#000000"
-					},
-					["One Dark"] = {
-						FontColor = "#abb2bf",
-						MainColor = "#282c34",
-						Accent = "#61afef",
-						BackgroundColor = "#21252b",
-						OutlineColor = "#000000"
-					},
-					["Tokyo Dark"] = {
-						FontColor = "#c0caf5",
-						MainColor = "#16161e",
-						Accent = "#9aa5ce",
-						BackgroundColor = "#0d0d15",
-						OutlineColor = "#000000"
-					},
-					["DOS"] = {
-						FontColor = "#00FF00",
-						MainColor = "#000000",
-						Accent = "#00AA00",
-						BackgroundColor = "#000000",
-						OutlineColor = "#222222"
-					},
-					["CRT Green"] = {
-						FontColor = "#7FFF00",
-						MainColor = "#101010",
-						Accent = "#00FF00",
-						BackgroundColor = "#050505",
-						OutlineColor = "#1A1A1A"
-					},
-					["Matrix"] = {
-						FontColor = "#00FF00",
-						MainColor = "#0A0A0A",
-						Accent = "#00CC66",
-						BackgroundColor = "#000000",
-						OutlineColor = "#0F0F0F"
-					},
-					["Old Terminal"] = {
-						FontColor = "#00DD00",
-						MainColor = "#111111",
-						Accent = "#00AA00",
-						BackgroundColor = "#000000",
-						OutlineColor = "#2F2F2F"
-					},
-					["Midnight Retro"] = {
-						FontColor = "#FF9EFF",
-						MainColor = "#0F0F1F",
-						Accent = "#9D00FF",
-						BackgroundColor = "#0A0A1A",
-						OutlineColor = "#1C1C2C"
-					},
-					["Neo Noir"] = {
-						FontColor = "#FF3366",
-						MainColor = "#1A1A1A",
-						Accent = "#C50052",
-						BackgroundColor = "#121212",
-						OutlineColor = "#2A2A2A"
-					},
-					["Dark Cherry"] = {
-						FontColor = "#FFE6F0",
-						MainColor = "#2B0B0B",
-						Accent = "#A30000",
-						BackgroundColor = "#1A0000",
-						OutlineColor = "#3B1C1C"
-					},
-					["Vintage Code"] = {
-						FontColor = "#F4ECD8",
-						MainColor = "#1B1B1B",
-						Accent = "#CC5500",
-						BackgroundColor = "#141414",
-						OutlineColor = "#333333"
-					},
-					["Oblivion"] = {
-						FontColor = "#E0E0E0",
-						MainColor = "#202020",
-						Accent = "#F92672",
-						BackgroundColor = "#121212",
-						OutlineColor = "#2E2E2E"
-					},
-					["Nocturne"] = {
-						FontColor = "#DADADA",
-						MainColor = "#121217",
-						Accent = "#A3D2FF",
-						BackgroundColor = "#0C0C10",
-						OutlineColor = "#1A1A1F"
-					},
-					["Zerox"] = {
-						FontColor = "#FFFFFF",
-						MainColor = "#181818",
-						Accent = "#AA00FF",
-						BackgroundColor = "#0F0F0F",
-						OutlineColor = "#2C2C2C"
-					},
-					["Void"] = {
-						FontColor = "#DDDDDD",
-						MainColor = "#0A0A0A",
-						Accent = "#6600CC",
-						BackgroundColor = "#000000",
-						OutlineColor = "#1A1A1A"
-					},
-					["Carbon"] = {
-						FontColor = "#E0E0E0",
-						MainColor = "#2A2A2A",
-						Accent = "#999999",
-						BackgroundColor = "#1A1A1A",
-						OutlineColor = "#383838"
-					},
-					["Black Ice"] = {
-						FontColor = "#CFCFCF",
-						MainColor = "#0E0E10",
-						Accent = "#34BFFF",
-						BackgroundColor = "#08080A",
-						OutlineColor = "#1C1C1F"
-					},
-					["Terminal Wave"] = {
-						FontColor = "#8AFFEF",
-						MainColor = "#14191F",
-						Accent = "#F92672",
-						BackgroundColor = "#0B0F14",
-						OutlineColor = "#1E252E"
-					}
-				}
-
-				local selectedTheme = themes[v]
-				if selectedTheme then
-					for i, v in pairs(selectedTheme) do
-						Library[i] = Color3.fromHex(v)
-					end
-					Library.DarkerAccent = Library:GetDarkerColor(Library.Accent)
-					if fontcolor then
-						fontcolor:Set(Library.FontColor)
-					end
-					if maincolor then
-						maincolor:Set(Library.MainColor)
-					end
-					if accentcolor then
-						accentcolor:Set(Library.Accent)
-					end
-					if outlinecolor then
-						outlinecolor:Set(Library.OutlineColor)
-					end
-					if backgroundcolor then
-						backgroundcolor:Set(Library.BackgroundColor)
-					end
-					Library:ChangeAccent()
-				end
-			end
-		})
-		maincolor = Themes:Colorpicker({
-			Name = "Main Color",
-			flag = "UI/MainColor",
-			State = Library.MainColor,
-			Callback = function(v)
-				Library.MainColor = v
-				Library:ChangeAccent()
-			end
-		})
-		backgroundcolor = Themes:Colorpicker({
-			Name = "Background Color",
-			Flag = "UI/BackgroundColor",
-			State = Library.BackgroundColor,
-			Callback = function(v)
-				Library.BackgroundColor = v
-				Library:ChangeAccent()
-			end
-		})
-		accentcolor = Themes:Colorpicker({
-			Name = "Accent Color",
-			Flag = "UI/AccentColor",
-			State = Library.Accent,
-			Callback = function(v)
-				Library.Accent = v
-				Library.DarkerAccent = Library:GetDarkerColor(Library.Accent)
-				Library:ChangeAccent()
-			end
-		})
-		outlinecolor = Themes:Colorpicker({
-			Name = "Outline Color",
-			Flag = "UI/OutlineColor",
-			State = Library.OutlineColor,
-			Callback = function(v)
-				Library.OutlineColor = v
-				Library:ChangeAccent()
-			end
-		})
-		fontcolor = Themes:Colorpicker({
-			Name = "Font Color",
-			Flag = "UI/FontColor",
-			State = Library.FontColor,
-			Callback = function(v)
-				Library.FontColor = v
-				Library:ChangeAccent()
-			end
-		})
-		Menu:Keybind({
-			Name = "UI Toggle",
-			Flag = "MenuKey",
-			Default = Enum.KeyCode.End,
-			Mode = "Toggle",
-			Callback = Library.SetOpen
-		})
-		Menu:Toggle({
-			Name = "Keybind List",
-			Flag = "KeybindList",
-			Callback = function(v)
-				Library.KeyList:SetVisible(v)
-			end
-		})
-
-		Menu:Toggle({
-			Name = "Watermark",
-			Flag = "Watermark",
-			Callback = function(v)
-				if v then
-					Library:ShowWatermark()  -- Call a function to show the watermark
-				else
-					Library:HideWatermark()  -- Call a function to hide the watermark
-				end
-			end
-		})
-
-		Menu:Button({
-			Name = "Unload",
-			Callback = function()
-				Library:Unload()
-			end
-		})
-		randomfunc = Cfgs:Textbox({
-			Flag = "SettingsConfigurationName",
-			Name = "Config name"
-		})
-		Cfgs:Button({
-			Name = "Create",
-			Callback = function()
-				local ConfigName = Library.Flags["SettingsConfigurationName"]
-				if ConfigName and ConfigName ~= "" or not isfile(ConfigFolder .. "/configs/" .. ConfigName) then
-					writefile(ConfigFolder .. "/configs/" .. ConfigName, Library:GetConfig())
-					UpdateConfigList()
-					randomfunc:set("")
-					CFGList:Set(ConfigName)
-					Library:Notification("Config Created: " .. ConfigName, 3, nil, "Top")
-				end
-			end
-		})
-		CFGList = Cfgs:Dropdown({
-			Name = "Saved Configs",
-			Flag = "SettingConfigurationList",
-			Options = {}
-		})
-		if not isfolder(ConfigFolder) then
-			makefolder(ConfigFolder)
-		end
-		if not isfolder(ConfigFolder .. "/configs") then
-			makefolder(ConfigFolder .. "/configs")
-		end
-		Cfgs:Button({
-			Name = "Save",
-			Callback = function()
-				local SelectedConfig = Library.Flags["SettingConfigurationList"]
-				if SelectedConfig then
-					writefile(ConfigFolder .. "/configs/" .. SelectedConfig, Library:GetConfig())
-					Library:Notification("Config Saved: " .. SelectedConfig, 3, nil, "Top")
-				else
-					Library:Notification("No Config Selected!", 3, nil, "Top")
-				end
-			end
-		})
-		Cfgs:Button({
-			Name = "Load",
-			Callback = function()
-				local SelectedConfig = Library.Flags["SettingConfigurationList"]
-				if SelectedConfig then
-					Library:LoadConfig(readfile(ConfigFolder .. "/configs/" .. SelectedConfig))
-					CFGList:Set(SelectedConfig)
-					Library:Notification("Config Loaded: " .. SelectedConfig, 3, nil, "Top")
-				else
-					Library:Notification("No Config Selected!", 3, nil, "Top")
-				end
-			end
-		})
-		Cfgs:Button({
-			Name = "Set Auto Load",
-			Callback = function()
-				local SelectedConfig = Library.Flags["SettingConfigurationList"]
-				if SelectedConfig then
-					writefile(ConfigFolder .. "/autoload.txt", Library.Flags["SettingConfigurationList"])
-					Library:Notification("Config Auto Loaded: " .. Library.Flags["SettingConfigurationList"], 7, nil, "Top")
-					autoloadlabel:SetText("Current Auto Load: " .. Library.Flags["SettingConfigurationList"])
-					loadedcfgshit = Library.Flags["SettingConfigurationList"]
-				else
-					Library:Notification("No Config Selected!", 3, nil, "Top")
-				end
-			end
-		})
-		Cfgs:Button({
-			Name = "Delete",
-			Callback = function()
-				local SelectedConfig = Library.Flags["SettingConfigurationList"]
-				if SelectedConfig then
-					delfile(ConfigFolder .. "/configs/" .. SelectedConfig)
-					Library:Notification("Config Deleted: " .. SelectedConfig, 3, nil, "Top")
-					UpdateConfigList()
-					CFGList:Set()
-					if SelectedConfig == loadedcfgshit then
-						autoloadlabel:SetText("Current Auto Load: None")
-						delfile(ConfigFolder .. "/autoload.txt")
-					end
-				else
-					Library:Notification("No Config Selected!", 3, nil, "Top")
-				end
-			end
-		})
-		Cfgs:Button({
-			Name = "Refresh",
-			Callback = function()
-				UpdateConfigList()
-				Library:Notification("Config List Refreshed", 3, nil, "Top")
-			end
-		})
-		UpdateConfigList()
-		autoloadlabel = Cfgs:Label({
-			Name = "Current Auto Load:",
-			Centered = true
-		})
-		Library:SetOpen()
-		if isfile(ConfigFolder .. "/autoload.txt") then
-			loadedcfgshit = readfile(ConfigFolder .. "/autoload.txt")
-			local configFile = ConfigFolder .. "/configs/" .. loadedcfgshit
-			if isfile(configFile) then
-				autoloadlabel:SetText("Current Auto Load: " .. loadedcfgshit)
-				Library:LoadConfig(readfile(configFile))
-				CFGList:Set(loadedcfgshit)
-			else
-				autoloadlabel:SetText("Current Auto Load: None")
-			end
-		else
-			autoloadlabel:SetText("Current Auto Load: None")
-		end
-	end
-end
---
 function Library:NewPicker(default, parent, count, flag, callback)
 	-- // Instances
 	local Icon = Library:Create('TextButton', {
@@ -1635,18 +936,16 @@ function Library:NewPicker(default, parent, count, flag, callback)
 		ZIndex = 1020000010
 	})
 	Library:Create('UIListLayout', {
-		Parent = ModeInline;
+		Parent = ModeInline,
 		SortOrder = Enum.SortOrder.LayoutOrder
 	})
 	local Hold = Library:Create('TextButton', {
 		Parent = ModeInline;
 		Size = UDim2.new(1, 0, 0, 15),
-		BackgroundColor3 = Color3.new(1, 1, 1),
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		BorderColor3 = Color3.new(0, 0, 0),
+		BackgroundColor3 = "MainColor",
+		BorderColor3 = "OutlineColor",
+		BorderMode = Enum.BorderMode.Inset,
 		Text = "Copy",
-		TextColor3 = Color3.fromRGB(145, 145, 145),
 		AutoButtonColor = false,
 		FontFace = Library.Font,
 		TextSize = Library.FontSize,
@@ -1656,12 +955,10 @@ function Library:NewPicker(default, parent, count, flag, callback)
 	local Toggle = Library:Create('TextButton', {
 		Parent = ModeInline;
 		Size = UDim2.new(1, 0, 0, 15),
-		BackgroundColor3 = Color3.new(1, 1, 1),
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		BorderColor3 = Color3.new(0, 0, 0),
+		BackgroundColor3 = "MainColor",
+		BorderColor3 = "OutlineColor",
+		BorderMode = Enum.BorderMode.Inset,
 		Text = "Paste",
-		TextColor3 = Color3.fromRGB(145, 145, 145),
 		AutoButtonColor = false,
 		FontFace = Library.Font,
 		TextSize = Library.FontSize,
@@ -1968,6 +1265,7 @@ do
 			Elements = {},
 		}
 		--
+
 		local TabButton = Library:Create('TextButton', {
 			Parent = Page.Window.Elements.TabHolder,
 			Size = UDim2.new(0.25, 0, 1, 0),
@@ -1983,6 +1281,9 @@ do
 			TextStrokeTransparency = 0,
 			LineHeight = 1.1,
 		})
+		if Properties and Properties.LastPage then
+			TabButton.LayoutOrder = 99999
+		end
 		local TabAccent = Library:Create('Frame', {
 			Parent = TabButton,
 			Size = UDim2.new(1, 0, 0, 2),
@@ -2428,12 +1729,10 @@ do
 			local Hold = Library:Create('TextButton', {
 				Parent = ModeInline,
 				Size = UDim2.new(1, 0, 0, 15),
-				BackgroundColor3 = Color3.new(1, 1, 1),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				BorderColor3 = Color3.new(0, 0, 0),
+				BackgroundColor3 = "MainColor",
+				BorderColor3 = "OutlineColor",
+				BorderMode = Enum.BorderMode.Inset,
 				Text = "Hold",
-				TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 				AutoButtonColor = false,
 				FontFace = Library.Font,
 				TextSize = Library.FontSize,
@@ -2443,31 +1742,46 @@ do
 			local Toggle = Library:Create('TextButton', {
 				Parent = ModeInline,
 				Size = UDim2.new(1, 0, 0, 15),
-				BackgroundColor3 = Color3.new(1, 1, 1),
-				BackgroundTransparency = 1,
-				BorderSizePixel = 0,
-				BorderColor3 = Color3.new(0, 0, 0),
+				BackgroundColor3 = "MainColor",
+				BorderColor3 = "OutlineColor",
+				BorderMode = Enum.BorderMode.Inset,
 				Text = "Toggle",
-				TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 				AutoButtonColor = false,
 				FontFace = Library.Font,
 				TextSize = Library.FontSize,
 				TextStrokeTransparency = 0,
 				ZIndex = 1020000010
 			})
-			self.ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Title.Text, not Keybind.FuckThisToggle and Keybind.Mode)
+			local Always = Library:Create('TextButton', {
+				Parent = ModeInline,
+				Size = UDim2.new(1, 0, 0, 15),
+				BackgroundColor3 = "MainColor",
+				BorderColor3 = "OutlineColor",
+				BorderMode = Enum.BorderMode.Inset,
+				Text = "Always",
+				AutoButtonColor = false,
+				FontFace = Library.Font,
+				TextSize = Library.FontSize,
+				TextStrokeTransparency = 0,
+				ZIndex = 1020000010
+			})
+			self.ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Keybind.Name, Keybind.Mode)
 			
 			local c
 			-- // Functions
 			local function set(newkey)
 				local modetable = {
 					"Toggle",
+					"Always",
 					"Hold"
 				}
 				if string.find(tostring(newkey), "Enum") then
 					if c then
 						c:Disconnect()
-						SetState(false)
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = false
+						end
+						Keybind.Callback(false)
 					end
 					if tostring(newkey):find("Enum.KeyCode.") then
 						newkey = Enum.KeyCode[tostring(newkey):gsub("Enum.KeyCode.", "")]
@@ -2476,1087 +1790,81 @@ do
 					end
 					if newkey == Enum.KeyCode.Backspace or newkey == Enum.KeyCode.Escape then
 						Key = nil
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = Key
+						if Keybind.UseKey then
+							if Keybind.Flag then
+								Library.Flags[Keybind.Flag] = Key
+							end
+							Keybind.Callback(Key)
 						end
-						Keybind.Callback(Key)
 						local text = ""
 						Value.Text = text
-						self.ListValue:Update(text, self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
-						self.ListValue:SetVisible(false)
+						ListValue:Update(text, Keybind.Name, Keybind.Mode)
+						ListValue:SetVisible(false)
 					elseif newkey ~= nil then
 						Key = newkey
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = Key
+						if Keybind.UseKey then
+							if Keybind.Flag then
+								Library.Flags[Keybind.Flag] = Key
+							end
+							Keybind.Callback(Key)
 						end
-						Keybind.Callback(Key)
 						local text = (Library.Keys[newkey] or tostring(newkey):gsub("Enum.KeyCode.", ""))
 						Value.Text = text
-						self.ListValue:Update(text, self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
+						ListValue:Update(text, Keybind.Name, Keybind.Mode)
+						if Keybind.Name == "UI Toggle" then
+							ListValue:SetColorBlue(true)
+						end
 					end
 					Library.Flags[Keybind.Flag .. "_KEY"] = newkey
 				elseif table.find(modetable, newkey) then
-					if not Keybind.FuckThisToggle then
+					if not Keybind.UseKey then
+						Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
+						Keybind.Mode = newkey
 						if Keybind.Mode == "Toggle" then
-							Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
-							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 							Library:AddToThemeObjects(Toggle, {
 								TextColor3 = "FontColor"
 							})
 							Library:RemoveFromThemeObjects(Hold)
+							Library:RemoveFromThemeObjects(Always)
+							Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
+							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+							Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 						elseif Keybind.Mode == "Hold" then
-							Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
-							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 							Library:AddToThemeObjects(Hold, {
 								TextColor3 = "FontColor"
 							})
 							Library:RemoveFromThemeObjects(Toggle)
+							Library:RemoveFromThemeObjects(Always)
+							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+							Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
+							Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						elseif Keybind.Mode == "Always" then
+							State = true
+							ListValue:SetColorBlue()
+							if Keybind.Flag then
+								Library.Flags[Keybind.Flag] = State
+							end
+							Keybind.Callback(true)
+							Library:AddToThemeObjects(Always, {
+								TextColor3 = "FontColor"
+							})
+							Library:RemoveFromThemeObjects(Toggle)
+							Library:RemoveFromThemeObjects(Hold)
+							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+							Library:TweenProperty(Always, "TextColor3", Library.FontColor, 0.2)
 						end
-						Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
-						Keybind.Mode = newkey
 						if Key ~= nil then
-							self.ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
+							ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), Keybind.Name, Keybind.Mode)
 						end
 					end
 				else
+					State = newkey
 					if Keybind.Flag then
 						Library.Flags[Keybind.Flag] = newkey
 					end
 					Keybind.Callback(newkey)
 				end
-			end
-			--
-			set(Keybind.State)
-			set(Keybind.Mode)
-			Library:Connection(Outline.MouseButton1Click, function()
-				if not Keybind.Binding then
-					Value.Text = "..."
-					Keybind.Binding = Library:Connection(userinput.InputBegan, function(input)
-						set(input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode or input.UserInputType)
-						Library:Disconnect(Keybind.Binding)
-						task.wait()
-						Keybind.Binding = nil
-					end
-					)
-				end
-			end)
-			--
-			if not Keybind.FuckThisToggle then
-				Library:Connection(userinput.InputBegan, function(inp)
-					if not userinput:GetFocusedTextBox() then	
-						if (inp.KeyCode == Key or inp.UserInputType == Key) and not Keybind.Binding and not Keybind.UseKey then
-							if Keybind.Mode == "Hold" then
-								c = Library:Connection(runserv.RenderStepped, function()
-									SetState(true)
-								end)
-							elseif Keybind.Mode == "Toggle" then
-								SetState()
-								if self.Toggled then
-									Library:TweenProperty(Title, "TextColor3", self.Risky and Color3.fromRGB(255, 0, 0) or Library.FontColor, 0.2)
-								else
-									Library:TweenProperty(Title, "TextColor3", self.Risky and Color3.fromRGB(255, 77, 74) or Color3.fromRGB(145, 145, 145), 0.2)
-								end
-							end
-						end
-					end
-				end)
-				--
-				Library:Connection(userinput.InputEnded, function(inp)
-					if not userinput:GetFocusedTextBox() then
-						if Keybind.Mode == "Hold" and not Keybind.UseKey then
-							if Key ~= "" or Key ~= nil then
-								if inp.KeyCode == Key or inp.UserInputType == Key then
-									if c then
-										c:Disconnect()
-										SetState(false)
-									end
-								end
-							end
-						end
-					end
-				end)
-				--
-				Library:Connection(Outline.MouseButton2Down, function()
-					Library:ManageTransparency(ModeOutline, "ModeOutline2", 0.2, ModeOutline.Visible)
-				end)
-				--
-				Library:Connection(Hold.MouseButton1Down, function()
-					set("Hold")
-					Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
-					Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-				end)
-				--
-				Library:Connection(Toggle.MouseButton1Down, function()
-					set("Toggle")
-					Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
-					Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-				end)
-				--
-				Library:Connection(userinput.InputBegan, function(Input)
-					if ModeOutline.Visible and Input.UserInputType == Enum.UserInputType.MouseButton1 then
-						if not Library:IsMouseOverFrame(ModeOutline) then
-							Library:ManageTransparency(ModeOutline, "ModeOutline2", 0.2, ModeOutline.Visible)
-						end
-					end
-				end)
-			end
-			--
-			Library:Connection(Outline.MouseEnter, function()
-				Library:TweenProperty(Outline, "BorderColor3", Library.Accent, 0.2)
-			end)
-			--
-			Library:Connection(Outline.MouseLeave, function()
-				Library:TweenProperty(Outline, "BorderColor3", Color3.new(0.0392, 0.0392, 0.0392), 0.2)
-			end)
-			--
-			Library.Flags[Keybind.Flag .. "_KEY"] = Keybind.State
-			Library.Flags[Keybind.Flag .. "_KEY STATE"] = Keybind.Mode
-			Flags[Keybind.Flag] = set
-			Flags[Keybind.Flag .. "_KEY"] = set
-			Flags[Keybind.Flag .. "_KEY STATE"] = set
-			--
-			function Keybind:Set(key)
-				set(key)
-			end
-		
-			-- // Returning
-			return Keybind
-		end
-		function Toggle:Colorpicker(Properties)
-			local Properties = Properties or {}
-			local Colorpicker = {
-				State = (
-					Properties.state
-						or Properties.State
-						or Properties.def
-						or Properties.Def
-						or Properties.default
-						or Properties.Default
-						or Color3.fromRGB(255, 0, 0)
-				),
-				Callback = (
-					Properties.callback
-						or Properties.Callback
-						or Properties.callBack
-						or Properties.CallBack
-						or function()
-				end
-				),
-				Flag = (
-					Properties.flag
-						or Properties.Flag
-						or Properties.pointer
-						or Properties.Pointer
-						or Library.NextFlag()
-				),
-			}
-			-- // Functions
-			Toggle.Colorpickers = Toggle.Colorpickers + 1
-			local colorpickertypes = Library:NewPicker(
-				Colorpicker.State,
-				NewToggle,
-				Toggle.Colorpickers - 1,
-				Colorpicker.Flag,
-				Colorpicker.Callback
-			)
-			function Colorpicker:Set(color)
-				colorpickertypes:set(color)
-			end
-
-			-- // Returning
-			return Colorpicker
-		end
-		function Toggle.Set(bool)
-			bool = type(bool) == "boolean" and bool or false
-			if Toggle.Toggled ~= bool then
-				SetState()
-				local color
-				if Toggle.Risky then
-					color = Toggle.Toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(255, 77, 74)
-				else
-					color = Toggle.Toggled and Library.FontColor or Color3.fromRGB(145, 145, 145)
-				end
-				Library:TweenProperty(Title, "TextColor3", color, 0.2)
-			end
-		end
-		-- // Misc Functions
-		Toggle.Set(Toggle.State)
-		Library.Flags[Toggle.Flag] = Toggle.State
-		Flags[Toggle.Flag] = Toggle.Set
-		Library.Toggles[Toggle.Flag] = Toggle
-
-		-- // Returning
-		return Toggle
-	end
-	--
-	function Sections:Slider(Properties)
-		if not Properties then
-			Properties = {}
-		end
-		--
-		local Slider = {
-			Window = self.Window,
-			Page = self.Page,
-			Section = self,
-			Name = Properties.Name or nil,
-			Min = (Properties.min or Properties.Min or Properties.minimum or Properties.Minimum or 0),
-			State = (
-				Properties.state
-					or Properties.State
-					or Properties.def
-					or Properties.Def
-					or Properties.default
-					or Properties.Default
-					or 0
-			),
-			Max = (Properties.max or Properties.Max or Properties.maximum or Properties.Maximum or 100),
-			Sub = (
-				Properties.suffix
-					or Properties.Suffix
-					or Properties.ending
-					or Properties.Ending
-					or Properties.prefix
-					or Properties.Prefix
-					or Properties.measurement
-					or Properties.Measurement
-					or ""
-			),
-			Decimals = (Properties.decimals or Properties.Decimals or 1),
-			Callback = (
-				Properties.callback
-					or Properties.Callback
-					or Properties.callBack
-					or Properties.CallBack
-					or function()
-			end
-			),
-			Flag = (
-				Properties.flag
-					or Properties.Flag
-					or Properties.pointer
-					or Properties.Pointer
-					or Library.NextFlag()
-			),
-		}
-		local TextValue = ("[value]" .. Slider.Sub)
-		--
-		local NewSlider = Library:Create('TextButton', {
-			Parent = Slider.Section.Elements.SectionContent,
-			Size = UDim2.new(1, 0, 0, 22),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "",
-			TextColor3 = Color3.new(0, 0, 0),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = 14,
-		})
-		local Outline = Library:Create('Frame', {
-			Parent = NewSlider,
-			Position = UDim2.new(0, 15, 1, 0),
-			Size = UDim2.new(1, -30, 0, 7),
-			BackgroundColor3 = "OutlineColor",
-			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
-			AnchorPoint = NewVector2(0, 1)
-		})
-		local Inline = Library:Create('Frame', {
-			Parent = Outline,
-			Position = UDim2.new(0, 1, 0, 1),
-			Size = UDim2.new(1, -2, 1, -2),
-			BackgroundColor3 = "MainColor",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0)
-		})
-		local Accent = Library:Create('TextButton', {
-			Parent = Inline,
-			Size = UDim2.new(0, 0, 1, 0),
-			BackgroundColor3 = "Accent",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "",
-			TextColor3 = Color3.new(0, 0, 0),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = 14
-		})
-		local Add = Library:Create('TextButton', {
-			Parent = Outline,
-			Position = UDim2.new(1, 5, 0.5, 0),
-			Size = UDim2.new(0, 10, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			AnchorPoint = NewVector2(0, 0.5),
-			Text = "+",
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0
-		})
-		local Subtract = Library:Create('TextButton', {
-			Parent = Outline,
-			Position = UDim2.new(0, -15, 0.5, 0),
-			Size = UDim2.new(0, 10, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			AnchorPoint = NewVector2(0, 0.5),
-			Text = "-",
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0
-		})
-		local Title = Library:Create('TextLabel', {
-			Parent = NewSlider,
-			Position = UDim2.new(0, 15, 0, 0),
-			Size = UDim2.new(1, 0, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			Text = Slider.Name,
-			TextStrokeTransparency = 0,
-		})
-		local Value = Library:Create('TextBox', {
-			Parent = NewSlider,
-			Position = UDim2.new(0, 15, 0, 0),
-			Size = UDim2.new(1, -30, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			TextColor3 = "FontColor",
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			TextStrokeTransparency = 0
-		})
-		--
-		-- // Functions
-		local Sliding = false
-		local Val = Slider.State
-		local function Round(Number, Float)
-			return math.floor(Number / Float + 0.5) * Float
-		end
-		
-		local function Set(value)
-			value = math.clamp(Round(value, Slider.Decimals), Slider.Min, Slider.Max)
-			local sizeX = ((value - Slider.Min) / (Slider.Max - Slider.Min))
-			Library:TweenProperty(Accent, "Size", UDim2.new(sizeX, 0, 1, 0), 0.2)
-			Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", value))
-			Val = value
-			Library.Flags[Slider.Flag] = value
-			Slider.Callback(value)
-		end	
-		--
-		local function Slide(input)
-			local sizeX = (input.Position.X - Outline.AbsolutePosition.X) / Outline.AbsoluteSize.X
-			local value = ((Slider.Max - Slider.Min) * sizeX) + Slider.Min
-			Set(value)
-		end
-		--
-		Library:Connection(NewSlider.InputBegan, function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Sliding = true
-				Slide(input)
-			end
-		end)
-		Library:Connection(NewSlider.InputEnded, function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Sliding = false
-			end
-		end)
-		Library:Connection(Accent.InputBegan, function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Sliding = true
-				Slide(input)
-			end
-		end)
-		Library:Connection(Accent.InputEnded, function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Sliding = false
-			end
-		end)
-		Library:Connection(userinput.InputChanged, function(input)
-			if input.UserInputType == Enum.UserInputType.MouseMovement then
-				if Sliding then
-					Slide(input)
-				end
-			end
-		end)
-		Library:Connection(NewSlider.MouseEnter, function()
-			Library:TweenProperty(Title, "TextColor3", Library.Accent, 0.2)
-		end)
-		--
-		Library:Connection(NewSlider.MouseLeave, function()
-			Library:TweenProperty(Title, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
-		end)
-		--
-		Library:Connection(Subtract.MouseButton1Down, function()
-			Set(Val - Slider.Decimals)
-		end)
-		Library:Connection(Value.FocusLost, function()
-			if tonumber(Value.Text) then
-				Set(Value.Text)
-			else
-				Set(Library.Flags[Slider.Flag])
-			end
-		end)
-		--
-		Library:Connection(Add.MouseButton1Down, function()
-			Set(Val + Slider.Decimals)
-		end)
-		--
-		function Slider:Set(Value)
-			Set(Value)
-		end
-		--
-		function Slider:SetVisible(Bool)
-			NewSlider.Visible = Bool
-		end 
-		--
-		Flags[Slider.Flag] = Set
-		Library.Flags[Slider.Flag] = Slider.State
-		Set(Slider.State)
-
-		-- // Returning
-		return Slider
-	end
-	--
-	function Sections:Dropdown(Properties)
-		local Properties = Properties or {};
-		local Dropdown = {
-			Window = self.Window,
-			Page = self.Page,
-			Section = self,
-			Open = false,
-			Name = Properties.Name or Properties.name or nil,
-			Options = (Properties.options or Properties.Options or Properties.values or Properties.Values or {
-				"1",
-				"2",
-				"3",
-			}),
-			Max = (Properties.Max or Properties.max or nil),
-			State = (
-				Properties.state
-					or Properties.State
-					or Properties.def
-					or Properties.Def
-					or Properties.default
-					or Properties.Default
-					or nil
-			),
-			Callback = (
-				Properties.callback
-					or Properties.Callback
-					or Properties.callBack
-					or Properties.CallBack
-					or function()
-			end
-			),
-			Flag = (
-				Properties.flag
-					or Properties.Flag
-					or Properties.pointer
-					or Properties.Pointer
-					or Library.NextFlag()
-			),
-			OptionInsts = {},
-		}
-		--
-		local NewDrop = Library:Create('Frame', {
-			Parent = Dropdown.Section.Elements.SectionContent,
-			Size = UDim2.new(1.12, 0, 0, 30),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0)
-		})
-		local Outline = Library:Create('TextButton', {
-			Parent = NewDrop,
-			Position = UDim2.new(0, 0, 1, 1),
-			Size = UDim2.new(1, -30, 0, 17),
-			BackgroundColor3 = "OutlineColor",
-			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
-			AnchorPoint = NewVector2(0, 1),
-			Text = "",
-			AutoButtonColor = false
-		})
-		local Inline = Library:Create('Frame', {
-			Parent = Outline,
-			Position = UDim2.new(0, 1, 0, 1),
-			Size = UDim2.new(1, -2, 1, -2),
-			BackgroundColor3 = "MainColor",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0)
-		})
-		local Value = Library:Create('TextLabel', {
-			Parent = Inline,
-			Position = UDim2.new(0, 4, 0, 0),
-			Size = UDim2.new(1, -30, 1, 0),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			TextColor3 = "FontColor",
-			FontFace = Library.Font,
-			Text = "",
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextStrokeTransparency = 0,
-			TextWrapped = true
-		})
-		local Icon = Library:Create('TextLabel', {
-			Parent = Inline,
-			Position = UDim2.new(0, -5, 0, 0),
-			Size = UDim2.new(1, 0, 1, 0),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "+",
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Right,
-			TextStrokeTransparency = 0
-		})
-		local Title = Library:Create('TextLabel', {
-			Parent = NewDrop,
-			Position = UDim2.new(0, 0, 0, 0),
-			Size = UDim2.new(1, 0, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			TextStrokeTransparency = 0,
-			Text = Dropdown.Name
-		})
-		local ContainerOutline = Library:Create('Frame', {
-			Parent = NewDrop,
-			Position = UDim2.new(0, 0, 1, 2),
-			Size = UDim2.new(1, -30, 0, 0),
-			BackgroundColor3 = "OutlineColor",
-			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
-			ZIndex = 5,
-			Visible = false
-		})
-		local ContainerInline = Library:Create('ScrollingFrame', {
-			Parent = ContainerOutline,
-			ScrollingDirection = Enum.ScrollingDirection.Y,
-			ScrollBarThickness = 3,
-			CanvasSize = UDim2.new(0, 0, 0, 0),
-			ScrollBarImageColor3 = "Accent",
-			AutomaticCanvasSize = Enum.AutomaticSize.Y,
-			Position = UDim2.new(0, 1, 0, 1),
-			Size = UDim2.new(1, -2, 1, -2),
-			BackgroundColor3 = "MainColor",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			ZIndex = 6;
-		})
-		Library:Create('UIListLayout', {
-			Parent = ContainerInline,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		})
-		local sizesaved
-		-- // Connections
-		Library:Connection(Outline.MouseButton1Down, function()
-			if not ContainerOutline.Visible then
-				ContainerOutline.Visible = true
-				Library:TweenProperty(ContainerOutline, "Size", sizesaved, 0.25)
-				NewDrop.ZIndex = 2
-				Icon.Text = "-"
-			else
-				Library:TweenProperty(ContainerOutline, "Size", UDim2.new(1, -30, 0, 0), 0.25)
-				NewDrop.ZIndex = 1
-				Icon.Text = "+"
-				task.wait(0.25)
-				ContainerOutline.Visible = false
-			end
-		end)
-		Library:Connection(userinput.InputBegan, function(Input)
-			if ContainerOutline.Visible and Input.UserInputType == Enum.UserInputType.MouseButton1 then
-				if not Library:IsMouseOverFrame(ContainerOutline) and not Library:IsMouseOverFrame(NewDrop) then
-					Library:TweenProperty(ContainerOutline, "Size", UDim2.new(1, -30, 0, 0), 0.25)
-					NewDrop.ZIndex = 1
-					Icon.Text = "+"
-					task.wait(0.25)
-					ContainerOutline.Visible = false
-				end
-			end
-		end)
-		Library:Connection(NewDrop.MouseEnter, function()
-			Library:TweenProperty(Outline, "BorderColor3", Library.Accent, 0.2)
-			Library:TweenProperty(Title, "TextColor3", Library.Accent, 0.2)
-		end)
-		
-		Library:Connection(NewDrop.MouseLeave, function()
-			Library:TweenProperty(Outline, "BorderColor3", Color3.new(0.0392, 0.0392, 0.0392), 0.2)
-			Library:TweenProperty(Title, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
-		end)
-		--
-		local chosen = Dropdown.Max and {} or nil
-		--
-		local function handleoptionclick(option, button, text)
-			Library:Connection(button.MouseButton1Down, function()
-				if Dropdown.Max and Dropdown.Max > 1 then
-					if table.find(chosen, option) then
-						table.remove(chosen, table.find(chosen, option))
-						local textchosen = {}
-						local cutobject = false
-						for _, opt in next, chosen do
-							table.insert(textchosen, opt)
-						end
-						Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
-						Library:TweenProperty(text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						Library.Flags[Dropdown.Flag] = chosen
-						Dropdown.Callback(chosen)
-					else
-						if #chosen == Dropdown.Max then
-							Library:TweenProperty(Dropdown.OptionInsts[chosen[1]].text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-							table.remove(chosen, 1)
-						end
-						table.insert(chosen, option)
-						local textchosen = {}
-						local cutobject = false
-						for _, opt in next, chosen do
-							table.insert(textchosen, opt)
-						end
-						Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
-						Library:TweenProperty(text, "TextColor3", Color3.new(1, 1, 1), 0.2)
-						Library.Flags[Dropdown.Flag] = chosen
-						Dropdown.Callback(chosen)
-					end
-				else
-					if chosen == option then
-						chosen = nil
-						Value.Text = ""
-						Library:TweenProperty(text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-					else
-						for _, tbl in next, Dropdown.OptionInsts do
-							Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						end
-						chosen = option
-						Value.Text = option
-						Library:TweenProperty(text, "TextColor3", Color3.new(1, 1, 1), 0.2)
-					end
-		
-					Library.Flags[Dropdown.Flag] = chosen
-					Dropdown.Callback(chosen)
-				end
-			end)
-		end
-		--
-		local function createoptions(tbl)
-			for _, option in next, tbl do
-				Dropdown.OptionInsts[option] = {}
-				local NewOption = Library:Create('TextButton', {
-					Parent = ContainerInline,
-					Size = UDim2.new(1, 0, 0, 15),
-					BackgroundColor3 = Color3.new(1, 1, 1),
-					BackgroundTransparency = 1,
-					BorderSizePixel = 0,
-					BorderColor3 = Color3.new(0, 0, 0),
-					Text = "",
-					TextColor3 = Color3.new(0, 0, 0),
-					AutoButtonColor = false,
-					FontFace = Library.Font,
-					TextSize = 14,
-					ZIndex = 7;
-				})
-				local OptionName = Library:Create('TextLabel', {
-					Parent = NewOption,
-					Position = UDim2.new(0, 2, 0, 0),
-					Size = UDim2.new(1, 0, 1, 0),
-					BackgroundColor3 = Color3.new(1, 1, 1),
-					BackgroundTransparency = 1,
-					BorderSizePixel = 0,
-					BorderColor3 = Color3.new(0, 0, 0),
-					Text = option,
-					TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-					FontFace = Library.Font,
-					TextSize = Library.FontSize,
-					TextXAlignment = Enum.TextXAlignment.Left,
-					TextStrokeTransparency = 0,
-					ZIndex = 8;
-				})
-				--
-				if #tbl ~= 0 then
-					local typeshit = #tbl * 15.5
-					sizesaved = UDim2.new(1, -30, 0, math.clamp(typeshit, 0, 155))
-				end
-				Dropdown.OptionInsts[option].button = NewOption
-				Dropdown.OptionInsts[option].text = OptionName
-				handleoptionclick(option, NewOption, OptionName)
-			end
-		end
-		createoptions(Dropdown.Options)
-		--
-		local set
-		set = function(option)
-			if Dropdown.Max and Dropdown.Max > 1 then
-				table.clear(chosen)
-				option = type(option) == "table" and option or {}
-				for opt, tbl in next, Dropdown.OptionInsts do
-					if not table.find(option, opt) then
-						Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-					end
-				end
-				for _, opt in next, option do
-					if table.find(Dropdown.Options, opt) and #chosen < Dropdown.Max then
-						table.insert(chosen, opt)
-						Library:TweenProperty(Dropdown.OptionInsts[opt].text, "TextColor3", Color3.new(1, 1, 1), 0.2)
-					end
-				end
-				local textchosen = {}
-				local cutobject = false
-				for _, opt in next, chosen do
-					table.insert(textchosen, opt)
-				end
-				Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
-				Library.Flags[Dropdown.Flag] = chosen
-				Dropdown.Callback(chosen)
-			end
-		end
-		--
-		function Dropdown:Set(option)
-			if Dropdown.Max and Dropdown.Max > 1 then
-				set(option)
-			else
-				for opt, tbl in next, Dropdown.OptionInsts do
-					if opt ~= option then
-						Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-					end
-				end
-				if option then
-					if typeof(option) == "table" then
-						option = option[1]
-					end
-					chosen = option
-					Value.Text = option
-					if table.find(Dropdown.Options, option) then
-						Library:TweenProperty(Dropdown.OptionInsts[option].text, "TextColor3", Color3.fromRGB(255, 255, 255), 0.2)
-					end
-					Library.Flags[Dropdown.Flag] = chosen
-					Dropdown.Callback(chosen)
-				else
-					chosen = nil
-					Value.Text = ""
-					Library.Flags[Dropdown.Flag] = chosen
-					Dropdown.Callback(chosen)
-				end
-			end
-		end
-		--
-		function Dropdown:Refresh(tbl)
-			for _, opt in next, Dropdown.OptionInsts do
-				coroutine.wrap(function()
-					opt.button:Destroy()
-				end)()
-			end
-			table.clear(Dropdown.OptionInsts)
-			createoptions(tbl)
-			if Dropdown.Max and Dropdown.Max > 1 then
-				table.clear(chosen)
-			else
-				chosen = nil
-			end
-			Library.Flags[Dropdown.Flag] = chosen
-			Dropdown.Callback(chosen)
-		end
-
-		-- // Returning
-		if Dropdown.Max and Dropdown.Max > 1 then
-			Flags[Dropdown.Flag] = set
-		else
-			Flags[Dropdown.Flag] = Dropdown
-		end
-		if (Dropdown.Max and Dropdown.Max > 1) or typeof(Dropdown.State) == "string" then
-			Dropdown:Set(Dropdown.State)
-		elseif typeof(Dropdown.State) == "table" then
-			Dropdown:Set(Dropdown.State[1])
-		end
-		function Dropdown:SetVisible(Bool)
-			NewDrop.Visible = Bool
-		end
-		return Dropdown
-	end
-	--
-	function Sections:Keybind(Properties)
-		local Properties = Properties or {}
-		local Keybind = {
-			Section = self,
-			Name = Properties.name or Properties.Name or "Keybind",
-			State = (
-				Properties.state
-					or Properties.State
-					or Properties.def
-					or Properties.Def
-					or Properties.default
-					or Properties.Default
-					or nil
-			),
-			Mode = (Properties.mode or Properties.Mode or "Toggle"),
-			UseKey = (Properties.UseKey or false),
-			Ignore = (Properties.ignore or Properties.Ignore or false),
-			Callback = (
-				Properties.callback
-					or Properties.Callback
-					or Properties.callBack
-					or Properties.CallBack
-					or function()
-			end
-			),
-			Flag = (
-				Properties.flag
-					or Properties.Flag
-					or Properties.pointer
-					or Properties.Pointer
-					or Library.NextFlag()
-			),
-			Binding = nil,
-		}
-		local Key
-		local State = false
-		--
-		local NewKey = Library:Create('Frame', {
-			Parent = Keybind.Section.Elements.SectionContent,
-			Size = UDim2.new(1, 0, 0, 12),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0)
-		})
-		local Outline = Library:Create('TextButton', {
-			Parent = NewKey,
-			Position = UDim2.new(1, 0, 0.5, 0),
-			Size = UDim2.new(0, 40, 0, 12),
-			BackgroundColor3 = "OutlineColor",
-			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
-			AnchorPoint = NewVector2(1, 0.5),
-			Text = "",
-			AutoButtonColor = false
-		})
-		local Inline = Library:Create('Frame', {
-			Parent = Outline,
-			Position = UDim2.new(0, 1, 0, 1),
-			Size = UDim2.new(1, -2, 1, -2),
-			BackgroundColor3 = "MainColor",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0)
-		})
-		local Value = Library:Create('TextLabel', {
-			Parent = Inline,
-			Size = UDim2.new(1, 0, 1, 0),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "",
-			TextColor3 = "FontColor",
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0
-		})
-		local Title = Library:Create('TextLabel', {
-			Parent = NewKey,
-			Position = UDim2.new(0, 15, 0, 0),
-			Size = UDim2.new(1, 0, 0, 10),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,	
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextXAlignment = Enum.TextXAlignment.Left,
-			Text = Keybind.Name,
-			TextStrokeTransparency = 0
-		})
-		local ModeOutline = Library:Create('Frame', {
-			Parent = NewKey,
-			Position = UDim2.new(1, 65, 0.5, 0),
-			Size = UDim2.new(0, 60, 0, 12),
-			BackgroundColor3 = "OutlineColor",
-			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
-			AnchorPoint = NewVector2(1, 0.5),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Rotation = 0.00001,
-			Visible = false,
-			ZIndex = 1020000010
-		})
-		local ModeInline = Library:Create('Frame', {
-			Parent = ModeOutline,
-			Position = UDim2.new(0, 1, 0, 1),
-			Size = UDim2.new(1, -2, 1, -2),
-			BackgroundColor3 = "MainColor",
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			ZIndex = 1020000010
-		})
-		Library:Create('UIListLayout', {
-			Parent = ModeInline,
-			SortOrder = Enum.SortOrder.LayoutOrder
-		})
-		local Hold = Library:Create('TextButton', {
-			Parent = ModeInline,
-			Size = UDim2.new(1, 0, 0, 15),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "Hold",
-			TextColor3 = Keybind.Mode == "Hold" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0,
-			ZIndex = 1020000010
-		})
-		local Toggle = Library:Create('TextButton', {
-			Parent = ModeInline,
-			Size = UDim2.new(1, 0, 0, 15),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "Toggle",
-			TextColor3 = Keybind.Mode == "Toggle" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0,
-			ZIndex = 1020000010
-		})
-		local Always = Library:Create('TextButton', {
-			Parent = ModeInline,
-			Size = UDim2.new(1, 0, 0, 15),
-			BackgroundColor3 = Color3.new(1, 1, 1),
-			BackgroundTransparency = 1,
-			BorderSizePixel = 0,
-			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "Always",
-			TextColor3 = Keybind.Mode == "Always" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
-			AutoButtonColor = false,
-			FontFace = Library.Font,
-			TextSize = Library.FontSize,
-			TextStrokeTransparency = 0,
-			ZIndex = 1020000010
-		})
-		local ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Keybind.Name, Keybind.Mode)
-		local c
-		-- // Functions
-		local function set(newkey)
-			local modetable = {
-				"Toggle",
-				"Always",
-				"Hold"
-			}
-			if string.find(tostring(newkey), "Enum") then
-				if c then
-					c:Disconnect()
-					if Keybind.Flag then
-						Library.Flags[Keybind.Flag] = false
-					end
-					Keybind.Callback(false)
-				end
-				if tostring(newkey):find("Enum.KeyCode.") then
-					newkey = Enum.KeyCode[tostring(newkey):gsub("Enum.KeyCode.", "")]
-				elseif tostring(newkey):find("Enum.UserInputType.") then
-					newkey = Enum.UserInputType[tostring(newkey):gsub("Enum.UserInputType.", "")]
-				end
-				if newkey == Enum.KeyCode.Backspace or newkey == Enum.KeyCode.Escape then
-					Key = nil
-					if Keybind.UseKey then
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = Key
-						end
-						Keybind.Callback(Key)
-					end
-					local text = ""
-					Value.Text = text
-					ListValue:Update(text, Keybind.Name, Keybind.Mode)
-					ListValue:SetVisible(false)
-				elseif newkey ~= nil then
-					Key = newkey
-					if Keybind.UseKey then
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = Key
-						end
-						Keybind.Callback(Key)
-					end
-					local text = (Library.Keys[newkey] or tostring(newkey):gsub("Enum.KeyCode.", ""))
-					Value.Text = text
-					ListValue:Update(text, Keybind.Name, Keybind.Mode)
-					if Keybind.Name == "UI Toggle" then
-						ListValue:SetColorBlue(true)
-					end
-				end
-				Library.Flags[Keybind.Flag .. "_KEY"] = newkey
-			elseif table.find(modetable, newkey) then
-				if not Keybind.UseKey then
-					Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
-					Keybind.Mode = newkey
-					if Keybind.Mode == "Toggle" then
-						Library:AddToThemeObjects(Toggle, {
-							TextColor3 = "FontColor"
-						})
-						Library:RemoveFromThemeObjects(Hold)
-						Library:RemoveFromThemeObjects(Always)
-						Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
-						Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-					elseif Keybind.Mode == "Hold" then
-						Library:AddToThemeObjects(Hold, {
-							TextColor3 = "FontColor"
-						})
-						Library:RemoveFromThemeObjects(Toggle)
-						Library:RemoveFromThemeObjects(Always)
-						Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
-						Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-					elseif Keybind.Mode == "Always" then
-						State = true
-						ListValue:SetColorBlue()
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = State
-						end
-						Keybind.Callback(true)
-						Library:AddToThemeObjects(Always, {
-							TextColor3 = "FontColor"
-						})
-						Library:RemoveFromThemeObjects(Toggle)
-						Library:RemoveFromThemeObjects(Hold)
-						Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						Library:TweenProperty(Always, "TextColor3", Library.FontColor, 0.2)
-					end
-					if Key ~= nil then
-						ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), Keybind.Name, Keybind.Mode)
-					end
-				end
-			else
-				State = newkey
-				if Keybind.Flag then
-					Library.Flags[Keybind.Flag] = newkey
-				end
-				Keybind.Callback(newkey)
 			end
 		end
 		--
@@ -3940,10 +2248,10 @@ do
 			BackgroundTransparency = 1,
 			BorderSizePixel = 0,
 			BorderColor3 = Color3.new(0, 0, 0),
+			Text = Button.Name,
 			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 			FontFace = Library.Font,
 			TextSize = Library.FontSize,
-			Text = Button.Name,
 			TextStrokeTransparency = 0
 		})
 		Library:Connection(NewButton.MouseEnter, function()
@@ -3998,54 +2306,710 @@ do
 		end
 		return Label
 	end
-
-	-- Function to show the watermark
-	function Library:ShowWatermark()
-		-- Create a Frame for the watermark
-		local watermarkFrame = Instance.new("Frame")
-		watermarkFrame.Size = UDim2.new(0, 200, 0, 50)  -- Adjust size as needed
-		watermarkFrame.Position = UDim2.new(0.5, -100, 0, 0)  -- Centered at the top
-		watermarkFrame.BackgroundTransparency = 0.5
-		watermarkFrame.Parent = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")  -- Ensure ScreenGui exists
-
-		-- Create a TextLabel for displaying FPS and Ping
-		local watermarkLabel = Instance.new("TextLabel")
-		watermarkLabel.Size = UDim2.new(1, 0, 1, 0)
-		watermarkLabel.BackgroundTransparency = 1
-		watermarkLabel.TextColor3 = Color3.new(1, 1, 1)  -- White text
-		watermarkLabel.TextScaled = true
-		watermarkLabel.Parent = watermarkFrame
-
-		-- Update the watermark with FPS and Ping
-		local function updateWatermark()
-			local fps = math.floor(1 / (game:GetService("RunService").RenderStepped:Wait() or 0.001))  -- Simple FPS calculation
-			local ping = game:GetService("Players").LocalPlayer:GetNetworkPing()  -- Get network ping
-			watermarkLabel.Text = "FPS: " .. fps .. " | Ping: " .. ping .. "ms"
-		end
-
-		-- Connect the update function to RenderStepped
-		local connection
-		connection = game:GetService("RunService").RenderStepped:Connect(function()
-			updateWatermark()
-		end)
-
-		-- Store the connection to disconnect later
-		watermarkFrame:GetPropertyChangedSignal("Visible"):Connect(function()
-			if not watermarkFrame.Visible then
-				connection:Disconnect()
+	task.spawn(function()
+		repeat task.wait() until Library.IsLoaded
+		local Config = Library.Window:Page({
+			Name = "Settings",
+			LastPage = true
+		})
+		do
+			local Menu = Config:Section({
+				Name = "Menu"
+			})
+			local PresetThemes = Config:Section({
+				Name = "Preset Themes"
+			})
+			local Themes = Config:Section({
+				Name = "Themes Configuration"
+			})
+			local Cfgs = Config:Section({
+				Name = "Configs",
+				Side = "Right"
+			})
+			local CurrentList = {}
+			local CFGList, loadedcfgshit, autoloadlabel, randomfunc, maincolor, backgroundcolor, outlinecolor, fontcolor, accentcolor
+			local function UpdateConfigList()
+				local List = {}
+				local SelectedConfig = Library.Flags["SettingConfigurationList"]
+				for _, file in ipairs(listfiles(ConfigFolder .. "/configs")) do
+					local FileName = file:gsub("\\", "/")
+					FileName = FileName:match("([^/]+)$")
+					List[#List + 1] = FileName
+				end
+				
+				local IsNew = #List ~= #CurrentList
+				if not IsNew then
+					for idx, file in ipairs(List) do
+						if file ~= CurrentList[idx] then
+							IsNew = true
+							break
+						end
+					end
+				end
+				if IsNew then
+					CurrentList = List
+					CFGList:Refresh(CurrentList)
+				end
+				if SelectedConfig then
+					randomfunc:set("")
+					CFGList:Set(SelectedConfig)
+				end
 			end
-		end)
-	end
+	PresetThemes:Dropdown({
+		Name = "Presets",
+		Flag = "UI/Presets",
+		Options = {
+			"Tokyo Night",
+			"Kanagawa",						
+			"Quartz",
+			"BBot",
+			"Fatality",
+			"Jester",
+			"Mint",
+			"Ubuntu",
+			"Abyss",
+			"Neverlose",
+			"Aimware",
+			"Youtube",
+			"Gamesense",
+			"Onetap",
+			"Entropy",
+			"Interwebz",
+			"Dracula",
+			"Spotify",
+			"Sublime",
+			"Vape",
+			"Neko",
+			"Corn",
+			"Minecraft",
+			"Nord",
+			"Monokai",
+			"Cyberpunk",
+			"Solarized Dark",
+			"Gruvbox",
+			"Night Owl",
+			"Arc Dark",
+			"Catppuccin",
+			"Tomorrow Night",
+			"Molokai",
+			"Material Palenight",
+			"Oceanic Next",
+			"Spacegray",
+			"PaperColor Dark",
+			"Edge",
+			"One Dark",
+			"Tokyo Dark",
+			"DOS",
+			"CRT Green",
+			"Matrix",
+			"Old Terminal",
+			"Midnight Retro",
+			"Neo Noir",
+			"Dark Cherry",
+			"Vintage Code",
+			"Oblivion",
+			"Nocturne",
+			"Zerox",
+			"Void",
+			"Carbon",
+			"Black Ice",
+			"Terminal Wave"
+		},
+		State = "Tokyo Night",
+		Callback = function(v)
+			local themes = {
+						['Tokyo Night'] = {
+										FontColor = "#FFFFFF",
+										MainColor = "#191925",
+										Accent = "#6759B3",
+										BackgroundColor = "#16161F",
+										OutlineColor = "#323232"
+						},
+						Kanagawa = {
+							FontColor = "#dcd7ba",
+							MainColor = "#1f1f28",
+							Accent = "#957fb8",
+							BackgroundColor = "#1a1a22",
+							OutlineColor = "#000000"
+						},						
+						Quartz = {
+							FontColor = "#ffffff",
+							MainColor = "#2e2e2e",
+							Accent = "#9147ff",
+							BackgroundColor = "#1c1c1c",
+							OutlineColor = "#000000"
+						},
+						BBot = {
+							FontColor = "#ffffff",
+							MainColor = "#2d2d2d",
+							Accent = "#3a9bfd",
+							BackgroundColor = "#1a1a1a",
+							OutlineColor = "#000000"
+						},
+						Fatality = {
+							FontColor = "#ffffff",
+							MainColor = "#191919",
+							Accent = "#e61c1c",
+							BackgroundColor = "#0f0f0f",
+							OutlineColor = "#000000"
+						},
+						Jester = {
+							FontColor = "#ffffff",
+							MainColor = "#292929",
+							Accent = "#ff00ff",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Mint = {
+							FontColor = "#ffffff",
+							MainColor = "#2a2a2a",
+							Accent = "#78ffd6",
+							BackgroundColor = "#1f1f1f",
+							OutlineColor = "#000000"
+						},
+						Ubuntu = {
+							FontColor = "#eeeeee",
+							MainColor = "#2c001e",
+							Accent = "#e95420",
+							BackgroundColor = "#300a24",
+							OutlineColor = "#000000"
+						},
+						Abyss = {
+							FontColor = "#dcdcdc",
+							MainColor = "#1c1c1c",
+							Accent = "#5e81ac",
+							BackgroundColor = "#101010",
+							OutlineColor = "#000000"
+						},
+						Neverlose = {
+							FontColor = "#f2f2f2",
+							MainColor = "#1e1e1e",
+							Accent = "#5fa8d3",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Aimware = {
+							FontColor = "#ffffff",
+							MainColor = "#2d2d2d",
+							Accent = "#e62e2e",
+							BackgroundColor = "#1a1a1a",
+							OutlineColor = "#000000"
+						},
+						Youtube = {
+							FontColor = "#ffffff",
+							MainColor = "#282828",
+							Accent = "#ff0000",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Gamesense = {
+							FontColor = "#b4b4b4",
+							MainColor = "#1a1a1a",
+							Accent = "#5eb95e",
+							BackgroundColor = "#101010",
+							OutlineColor = "#000000"
+						},
+						Onetap = {
+							FontColor = "#ffffff",
+							MainColor = "#232323",
+							Accent = "#2e8bff",
+							BackgroundColor = "#141414",
+							OutlineColor = "#000000"
+						},
+						Entropy = {
+							FontColor = "#e0e0e0",
+							MainColor = "#2a2a2a",
+							Accent = "#b16286",
+							BackgroundColor = "#1a1a1a",
+							OutlineColor = "#000000"
+						},
+						Interwebz = {
+							FontColor = "#ffffff",
+							MainColor = "#292929",
+							Accent = "#e600ff",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Dracula = {
+							FontColor = "#f8f8f2",
+							MainColor = "#282a36",
+							Accent = "#bd93f9",
+							BackgroundColor = "#1e1f29",
+							OutlineColor = "#000000"
+						},
+						Spotify = {
+							FontColor = "#ffffff",
+							MainColor = "#191414",
+							Accent = "#1db954",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Sublime = {
+							FontColor = "#f8f8f2",
+							MainColor = "#2b2b2b",
+							Accent = "#66d9ef",
+							BackgroundColor = "#1e1e1e",
+							OutlineColor = "#000000"
+						},
+						Vape = {
+							FontColor = "#ffffff",
+							MainColor = "#1f1f1f",
+							Accent = "#8c52ff",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Neko = {
+							FontColor = "#ffffff",
+							MainColor = "#2d2a55",
+							Accent = "#ff77a8",
+							BackgroundColor = "#1b1b3a",
+							OutlineColor = "#000000"
+						},
+						Corn = {
+							FontColor = "#DCDCDC",
+							MainColor = "#252525",
+							Accent = "#FF9000",
+							BackgroundColor = "#191919",
+							OutlineColor = "#000000"
+						},
+						Minecraft = {
+							FontColor = "#FFFFFF",
+							MainColor = "#333333",
+							Accent = "#27CE40",
+							BackgroundColor = "#262626",
+							OutlineColor = "#000000"
+						},
+						Nord = {
+							FontColor = "#D8DEE9",
+							MainColor = "#2E3440",
+							Accent = "#88C0D0",
+							BackgroundColor = "#3B4252",
+							OutlineColor = "#4C566A"
+						},
+						Monokai = {
+							FontColor = "#F8F8F2",
+							MainColor = "#272822",
+							Accent = "#FD971F",
+							BackgroundColor = "#1E1F1C",
+							OutlineColor = "#75715E"
+						},
+						Cyberpunk = {
+							FontColor = "#FF66C4",
+							MainColor = "#0D0221",
+							Accent = "#00FFFF",
+							BackgroundColor = "#1A0033",
+							OutlineColor = "#4A0072"
+						},
+						["Solarized Dark"] = {
+							FontColor = "#EEE8D5",
+							MainColor = "#002B36",
+							Accent = "#268BD2",
+							BackgroundColor = "#073642",
+							OutlineColor = "#586E75"
+						},
+						Gruvbox = {
+							FontColor = "#EBDBB2",
+							MainColor = "#282828",
+							Accent = "#FE8019",
+							BackgroundColor = "#1D2021",
+							OutlineColor = "#3C3836"
+						},
+						["Night Owl"] = {
+							FontColor = "#d6deeb",
+							MainColor = "#011627",
+							Accent = "#82AAFF",
+							BackgroundColor = "#0f111a",
+							OutlineColor = "#000000"
+						},
+						["Arc Dark"] = {
+							FontColor = "#ffffff",
+							MainColor = "#383c4a",
+							Accent = "#5294e2",
+							BackgroundColor = "#2f343f",
+							OutlineColor = "#000000"
+						},
+						Catppuccin = {
+							FontColor = "#cdd6f4",
+							MainColor = "#1e1e2e",
+							Accent = "#89b4fa",
+							BackgroundColor = "#181825",
+							OutlineColor = "#000000"
+						},
+						["Tomorrow Night"] = {
+							FontColor = "#cccccc",
+							MainColor = "#1d1f21",
+							Accent = "#81a2be",
+							BackgroundColor = "#282a2e",
+							OutlineColor = "#000000"
+						},
+						Molokai = {
+							FontColor = "#f8f8f2",
+							MainColor = "#1b1d1e",
+							Accent = "#fd971f",
+							BackgroundColor = "#272822",
+							OutlineColor = "#000000"
+						},
+						["Material Palenight"] = {
+							FontColor = "#c3e88d",
+							MainColor = "#292d3e",
+							Accent = "#82aaff",
+							BackgroundColor = "#1e212e",
+							OutlineColor = "#000000"
+						},
+						["Oceanic Next"] = {
+							FontColor = "#d8dee9",
+							MainColor = "#1b2b34",
+							Accent = "#6699cc",
+							BackgroundColor = "#0f1c26",
+							OutlineColor = "#000000"
+						},
+						Spacegray = {
+							FontColor = "#ffffff",
+							MainColor = "#20242b",
+							Accent = "#b3b3b3",
+							BackgroundColor = "#2c2f36",
+							OutlineColor = "#000000"
+						},
+						["PaperColor Dark"] = {
+							FontColor = "#eeeeee",
+							MainColor = "#1c1c1c",
+							Accent = "#af5f5f",
+							BackgroundColor = "#121212",
+							OutlineColor = "#000000"
+						},
+						Edge = {
+							FontColor = "#ffffff",
+							MainColor = "#262a33",
+							Accent = "#528bff",
+							BackgroundColor = "#1c1f26",
+							OutlineColor = "#000000"
+						},
+						["One Dark"] = {
+							FontColor = "#abb2bf",
+							MainColor = "#282c34",
+							Accent = "#61afef",
+							BackgroundColor = "#21252b",
+							OutlineColor = "#000000"
+						},
+						["Tokyo Dark"] = {
+							FontColor = "#c0caf5",
+							MainColor = "#16161e",
+							Accent = "#9aa5ce",
+							BackgroundColor = "#0d0d15",
+							OutlineColor = "#000000"
+						},
+						["DOS"] = {
+							FontColor = "#00FF00",
+							MainColor = "#000000",
+							Accent = "#00AA00",
+							BackgroundColor = "#000000",
+							OutlineColor = "#222222"
+						},
+						["CRT Green"] = {
+							FontColor = "#7FFF00",
+							MainColor = "#101010",
+							Accent = "#00FF00",
+							BackgroundColor = "#050505",
+							OutlineColor = "#1A1A1A"
+						},
+						["Matrix"] = {
+							FontColor = "#00FF00",
+							MainColor = "#0A0A0A",
+							Accent = "#00CC66",
+							BackgroundColor = "#000000",
+							OutlineColor = "#0F0F0F"
+						},
+						["Old Terminal"] = {
+							FontColor = "#00DD00",
+							MainColor = "#111111",
+							Accent = "#00AA00",
+							BackgroundColor = "#000000",
+							OutlineColor = "#2F2F2F"
+						},
+						["Midnight Retro"] = {
+							FontColor = "#FF9EFF",
+							MainColor = "#0F0F1F",
+							Accent = "#9D00FF",
+							BackgroundColor = "#0A0A1A",
+							OutlineColor = "#1C1C2C"
+						},
+						["Neo Noir"] = {
+							FontColor = "#FF3366",
+							MainColor = "#1A1A1A",
+							Accent = "#C50052",
+							BackgroundColor = "#121212",
+							OutlineColor = "#2A2A2A"
+						},
+						["Dark Cherry"] = {
+							FontColor = "#FFE6F0",
+							MainColor = "#2B0B0B",
+							Accent = "#A30000",
+							BackgroundColor = "#1A0000",
+							OutlineColor = "#3B1C1C"
+						},
+						["Vintage Code"] = {
+							FontColor = "#F4ECD8",
+							MainColor = "#1B1B1B",
+							Accent = "#CC5500",
+							BackgroundColor = "#141414",
+							OutlineColor = "#333333"
+						},
+						["Oblivion"] = {
+							FontColor = "#E0E0E0",
+							MainColor = "#202020",
+							Accent = "#F92672",
+							BackgroundColor = "#121212",
+							OutlineColor = "#2E2E2E"
+						},
+						["Nocturne"] = {
+							FontColor = "#DADADA",
+							MainColor = "#121217",
+							Accent = "#A3D2FF",
+							BackgroundColor = "#0C0C10",
+							OutlineColor = "#1A1A1F"
+						},
+						["Zerox"] = {
+							FontColor = "#FFFFFF",
+							MainColor = "#181818",
+							Accent = "#AA00FF",
+							BackgroundColor = "#0F0F0F",
+							OutlineColor = "#2C2C2C"
+						},
+						["Void"] = {
+							FontColor = "#DDDDDD",
+							MainColor = "#0A0A0A",
+							Accent = "#6600CC",
+							BackgroundColor = "#000000",
+							OutlineColor = "#1A1A1A"
+						},
+						["Carbon"] = {
+							FontColor = "#E0E0E0",
+							MainColor = "#2A2A2A",
+							Accent = "#999999",
+							BackgroundColor = "#1A1A1A",
+							OutlineColor = "#383838"
+						},
+						["Black Ice"] = {
+							FontColor = "#CFCFCF",
+							MainColor = "#0E0E10",
+							Accent = "#34BFFF",
+							BackgroundColor = "#08080A",
+							OutlineColor = "#1C1C1F"
+						},
+						["Terminal Wave"] = {
+							FontColor = "#8AFFEF",
+							MainColor = "#14191F",
+							Accent = "#F92672",
+							BackgroundColor = "#0B0F14",
+							OutlineColor = "#1E252E"
+						}
+					}
 
-	-- Function to hide the watermark
-	function Library:HideWatermark()
-		local watermarkFrame = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui"):FindFirstChild("WatermarkFrame")
-		if watermarkFrame then
-			watermarkFrame.Visible = false
-		else
-			warn("Watermark frame not found.")
+					local selectedTheme = themes[v]
+					if selectedTheme then
+						for i, v in pairs(selectedTheme) do
+							Library[i] = Color3.fromHex(v)
+						end
+						Library.DarkerAccent = Library:GetDarkerColor(Library.Accent)
+						if fontcolor then
+							fontcolor:Set(Library.FontColor)
+						end
+						if maincolor then
+							maincolor:Set(Library.MainColor)
+						end
+						if accentcolor then
+							accentcolor:Set(Library.Accent)
+						end
+						if outlinecolor then
+							outlinecolor:Set(Library.OutlineColor)
+						end
+						if backgroundcolor then
+							backgroundcolor:Set(Library.BackgroundColor)
+						end
+						Library:ChangeAccent()
+					end
+				end
+			})
+			maincolor = Themes:Colorpicker({
+				Name = "Main Color",
+				flag = "UI/MainColor",
+				State = Library.MainColor,
+				Callback = function(v)
+					Library.MainColor = v
+					Library:ChangeAccent()
+				end
+			})
+			backgroundcolor = Themes:Colorpicker({
+				Name = "Background Color",
+				Flag = "UI/BackgroundColor",
+				State = Library.BackgroundColor,
+				Callback = function(v)
+					Library.BackgroundColor = v
+					Library:ChangeAccent()
+				end
+			})
+			accentcolor = Themes:Colorpicker({
+				Name = "Accent Color",
+				Flag = "UI/AccentColor",
+				State = Library.Accent,
+				Callback = function(v)
+					Library.Accent = v
+					Library.DarkerAccent = Library:GetDarkerColor(Library.Accent)
+					Library:ChangeAccent()
+				end
+			})
+			outlinecolor = Themes:Colorpicker({
+				Name = "Outline Color",
+				Flag = "UI/OutlineColor",
+				State = Library.OutlineColor,
+				Callback = function(v)
+					Library.OutlineColor = v
+					Library:ChangeAccent()
+				end
+			})
+			fontcolor = Themes:Colorpicker({
+				Name = "Font Color",
+				Flag = "UI/FontColor",
+				State = Library.FontColor,
+				Callback = function(v)
+					Library.FontColor = v
+					Library:ChangeAccent()
+				end
+			})
+			Menu:Keybind({
+				Name = "UI Toggle",
+				Flag = "MenuKey",
+				Default = Enum.KeyCode.End,
+				Mode = "Toggle",
+				Callback = Library.SetOpen
+			})
+			Menu:Toggle({
+				Name = "Keybind List",
+				Flag = "KeybindList",
+				Callback = function(v)
+					Library.KeyList:SetVisible(v)
+				end
+			})
+			Menu:Button({
+				Name = "Unload",
+				Callback = function()
+					Library:Unload()
+				end
+			})
+			randomfunc = Cfgs:Textbox({
+				Flag = "SettingsConfigurationName",
+				Name = "Config name"
+			})
+			Cfgs:Button({
+				Name = "Create",
+				Callback = function()
+					local ConfigName = Library.Flags["SettingsConfigurationName"]
+					if ConfigName and ConfigName ~= "" or not isfile(ConfigFolder .. "/configs/" .. ConfigName) then
+						writefile(ConfigFolder .. "/configs/" .. ConfigName, Library:GetConfig())
+						UpdateConfigList()
+						randomfunc:set("")
+						CFGList:Set(ConfigName)
+						Library:Notification("Config Created: " .. ConfigName, 3, nil, "Top")
+					end
+				end
+			})
+			CFGList = Cfgs:Dropdown({
+				Name = "Saved Configs",
+				Flag = "SettingConfigurationList",
+				Options = {}
+			})
+			if not isfolder(ConfigFolder) then
+				makefolder(ConfigFolder)
+			end
+			if not isfolder(ConfigFolder .. "/configs") then
+				makefolder(ConfigFolder .. "/configs")
+			end
+			Cfgs:Button({
+				Name = "Save",
+				Callback = function()
+					local SelectedConfig = Library.Flags["SettingConfigurationList"]
+					if SelectedConfig then
+						writefile(ConfigFolder .. "/configs/" .. SelectedConfig, Library:GetConfig())
+						Library:Notification("Config Saved: " .. SelectedConfig, 3, nil, "Top")
+					else
+						Library:Notification("No Config Selected!", 3, nil, "Top")
+					end
+				end
+			})
+			Cfgs:Button({
+				Name = "Load",
+				Callback = function()
+					local SelectedConfig = Library.Flags["SettingConfigurationList"]
+					if SelectedConfig then
+						Library:LoadConfig(readfile(ConfigFolder .. "/configs/" .. SelectedConfig))
+						CFGList:Set(SelectedConfig)
+						Library:Notification("Config Loaded: " .. SelectedConfig, 3, nil, "Top")
+					else
+						Library:Notification("No Config Selected!", 3, nil, "Top")
+					end
+				end
+			})
+			Cfgs:Button({
+				Name = "Set Auto Load",
+				Callback = function()
+					local SelectedConfig = Library.Flags["SettingConfigurationList"]
+					if SelectedConfig then
+						writefile(ConfigFolder .. "/autoload.txt", Library.Flags["SettingConfigurationList"])
+						Library:Notification("Config Auto Loaded: " .. Library.Flags["SettingConfigurationList"], 7, nil, "Top")
+						autoloadlabel:SetText("Current Auto Load: " .. Library.Flags["SettingConfigurationList"])
+						loadedcfgshit = Library.Flags["SettingConfigurationList"]
+					else
+						Library:Notification("No Config Selected!", 3, nil, "Top")
+					end
+				end
+			})
+			Cfgs:Button({
+				Name = "Delete",
+				Callback = function()
+					local SelectedConfig = Library.Flags["SettingConfigurationList"]
+					if SelectedConfig then
+						delfile(ConfigFolder .. "/configs/" .. SelectedConfig)
+						Library:Notification("Config Deleted: " .. SelectedConfig, 3, nil, "Top")
+						UpdateConfigList()
+						CFGList:Set()
+						if SelectedConfig == loadedcfgshit then
+							autoloadlabel:SetText("Current Auto Load: None")
+							delfile(ConfigFolder .. "/autoload.txt")
+						end
+					else
+						Library:Notification("No Config Selected!", 3, nil, "Top")
+					end
+				end
+			})
+			Cfgs:Button({
+				Name = "Refresh",
+				Callback = function()
+					UpdateConfigList()
+					Library:Notification("Config List Refreshed", 3, nil, "Top")
+				end
+			})
+			UpdateConfigList()
+			autoloadlabel = Cfgs:Label({
+				Name = "Current Auto Load:",
+				Centered = true
+			})
+			Library:SetOpen()
+
+			if isfile(ConfigFolder .. "/autoload.txt") then
+				loadedcfgshit = readfile(ConfigFolder .. "/autoload.txt")
+				local configFile = ConfigFolder .. "/configs/" .. loadedcfgshit
+				if isfile(configFile) then
+					autoloadlabel:SetText("Current Auto Load: " .. loadedcfgshit)
+					Library:LoadConfig(readfile(configFile))
+					CFGList:Set(loadedcfgshit)
+				else
+					autoloadlabel:SetText("Current Auto Load: None")
+				end
+			else
+				autoloadlabel:SetText("Current Auto Load: None")
+			end
 		end
-	end
+	end)
 
 	return Library
 end
