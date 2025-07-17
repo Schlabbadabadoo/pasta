@@ -96,6 +96,8 @@ Library.__index = Library;
 Library.Pages.__index = Library.Pages;
 Library.Sections.__index = Library.Sections;
 
+Library.CornerRadius = UDim.new(0, 6)
+
 if not isfolder(Library.Folder) then
 	makefolder(Library.Folder)
 end
