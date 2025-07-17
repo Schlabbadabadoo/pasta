@@ -96,7 +96,7 @@ Library.__index = Library;
 Library.Pages.__index = Library.Pages;
 Library.Sections.__index = Library.Sections;
 
-Library.CornerRadius = UDim.new(0, 6)
+
 
 if not isfolder(Library.Folder) then
 	makefolder(Library.Folder)
@@ -184,6 +184,7 @@ function Library:Create(Class, Properties, Secure)
         instance[Property] = resolvedValue
     end
 
+	Library.CornerRadius = UDim.new(0, 6)
     -- Add rounded corners to supported GUI objects
     local roundedClasses = {
         ["Frame"] = true,
