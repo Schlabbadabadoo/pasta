@@ -411,9 +411,6 @@ function Library.NextFlag()
 	return string.format("%.14g", Library.UnNamedFlags)
 end
 --
--- Add this before the Config section
-local ConfigFolder = "Cinematic/"
---
 function Library:GetConfig()
 	local Config = ""
 	for Index, Value in pairs(self.Flags) do
@@ -3316,32 +3313,41 @@ do
 			local CurrentList = {}
 			local CFGList, loadedcfgshit, autoloadlabel, randomfunc, maincolor, backgroundcolor, outlinecolor, fontcolor, accentcolor
 			local function UpdateConfigList()
-				local List = {}
-				local SelectedConfig = Library.Flags["SettingConfigurationList"]
-				for _, file in ipairs(listfiles(ConfigFolder .. "/configs")) do
+			local List = {}
+			local SelectedConfig = Library.Flags["SettingConfigurationList"]
+			
+			-- Safety check for folder existence and file list
+			if not isfolder(ConfigFolder .. "/configs") then
+				makefolder(ConfigFolder .. "/configs")
+			end
+			
+			local files = listfiles(ConfigFolder .. "/configs")
+			if files then  -- Add this check
+				for _, file in ipairs(files) do
 					local FileName = file:gsub("\\", "/")
 					FileName = FileName:match("([^/]+)$")
 					List[#List + 1] = FileName
 				end
-				
-				local IsNew = #List ~= #CurrentList
-				if not IsNew then
-					for idx, file in ipairs(List) do
-						if file ~= CurrentList[idx] then
-							IsNew = true
-							break
-						end
+			end
+			
+			local IsNew = #List ~= #CurrentList
+			if not IsNew then
+				for idx, file in ipairs(List) do
+					if file ~= CurrentList[idx] then
+						IsNew = true
+						break
 					end
 				end
-				if IsNew then
-					CurrentList = List
-					CFGList:Refresh(CurrentList)
-				end
-				if SelectedConfig then
-					randomfunc:set("")
-					CFGList:Set(SelectedConfig)
-				end
 			end
+			if IsNew then
+				CurrentList = List
+				CFGList:Refresh(CurrentList)
+			end
+			if SelectedConfig then
+				randomfunc:set("")
+				CFGList:Set(SelectedConfig)
+			end
+		end
 			PresetThemes:Dropdown({
 				Name = "Presets",
 				Flag = "UI/Presets",
