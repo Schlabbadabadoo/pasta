@@ -411,6 +411,9 @@ function Library.NextFlag()
 	return string.format("%.14g", Library.UnNamedFlags)
 end
 --
+-- Add this before the Config section
+local ConfigFolder = "Cinematic/"
+--
 function Library:GetConfig()
 	local Config = ""
 	for Index, Value in pairs(self.Flags) do
