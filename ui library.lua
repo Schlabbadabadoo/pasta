@@ -1,4 +1,4 @@
-local Library = {
+Library = {
 	Open = true;
 	Accent = Color3.fromHex("6759b3");
 	DarkerAccent = nil;
@@ -68,15 +68,13 @@ local Library = {
 		[Enum.UserInputType.MouseButton3] = "MB3"
 	};
 	Connections = {};
-	HookedFunctions = {};
-	ChangedUpValues = {};
 	Font = nil;
 	FontSize = 12;
 	Notifs = {};
 	KeyList = nil;
 	ScreenGUI = nil;
 	Window = nil;
-	Folder = "pastalua/"
+	Folder = "Cinematic/"
 }
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players");
@@ -95,8 +93,6 @@ local NewVector2 = Vector2.new;
 Library.__index = Library;
 Library.Pages.__index = Library.Pages;
 Library.Sections.__index = Library.Sections;
-
-
 
 if not isfolder(Library.Folder) then
 	makefolder(Library.Folder)
@@ -156,56 +152,39 @@ function Library:TweenProperty(object, property, endValue, duration)
 	return tween
 end
 function Library:Create(Class, Properties, Secure)
-    local instance = Instance.new(Class)
-    
-    if Secure then
-        ProtectGui(instance)
-    end
-    
-    local colorMapping = {
-        FontColor = Library.FontColor,
-        Accent = Library.Accent,
-        DarkerAccent = Library.DarkerAccent,
-        OutlineColor = Library.OutlineColor,
-        MainColor = Library.MainColor,
-        BackgroundColor = Library.BackgroundColor
-    }
-    
-    local themeProperties = {}
-    
-    for Property, Value in pairs(Properties) do
-        local resolvedValue = Value
-        
-        if typeof(Value) == "string" and colorMapping[Value] then
-            resolvedValue = colorMapping[Value]
-            themeProperties[Property] = Value
-        end
-        
-        instance[Property] = resolvedValue
-    end
-
-	Library.CornerRadius = UDim.new(0, 6)
-    -- Add rounded corners to supported GUI objects
-    local roundedClasses = {
-        ["Frame"] = true,
-        ["TextButton"] = true,
-        ["TextLabel"] = true,
-        ["ImageLabel"] = true,
-        ["ScrollingFrame"] = true,
-        ["TextBox"] = true,
-        ["ImageButton"] = true,
-    }
-    if roundedClasses[Class] then
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = Library.CornerRadius
-        corner.Parent = instance
-    end
-
-    if next(themeProperties) then
-        Library:AddToThemeObjects(instance, themeProperties)
-    end
-    
-    return instance
+	local instance = Instance.new(Class)
+	
+	if Secure then
+		ProtectGui(instance)
+	end
+	
+	local colorMapping = {
+		FontColor = Library.FontColor,
+		Accent = Library.Accent,
+		DarkerAccent = Library.DarkerAccent,
+		OutlineColor = Library.OutlineColor,
+		MainColor = Library.MainColor,
+		BackgroundColor = Library.BackgroundColor
+	}
+	
+	local themeProperties = {}
+	
+	for Property, Value in pairs(Properties) do
+		local resolvedValue = Value
+		
+		if typeof(Value) == "string" and colorMapping[Value] then
+			resolvedValue = colorMapping[Value]
+			themeProperties[Property] = Value
+		end
+		
+		instance[Property] = resolvedValue
+	end
+	
+	if next(themeProperties) then
+		Library:AddToThemeObjects(instance, themeProperties)
+	end
+	
+	return instance
 end
 
 function Library:Connection(Signal, Callback)
@@ -235,7 +214,10 @@ end
 function Library:SetUpValue(UpValueFunction, UpValueNumber, NewUpValue)
 	local UpValue = getupvalue(UpValueFunction, UpValueNumber)
 	setupvalue(UpValueFunction, UpValueNumber, NewUpValue)
-	Library.ChangedUpValues[UpValueFunction] = {UpValueNumber, UpValue}
+	Library.ChangedUpValues[UpValueFunction] = {
+		UpValueNumber,
+		UpValue
+	}
 	return UpValue
 end
 
@@ -939,16 +921,18 @@ function Library:NewPicker(default, parent, count, flag, callback)
 		ZIndex = 1020000010
 	})
 	Library:Create('UIListLayout', {
-		Parent = ModeInline,
+		Parent = ModeInline;
 		SortOrder = Enum.SortOrder.LayoutOrder
 	})
 	local Hold = Library:Create('TextButton', {
 		Parent = ModeInline;
 		Size = UDim2.new(1, 0, 0, 15),
-		BackgroundColor3 = "MainColor",
-		BorderColor3 = "OutlineColor",
-		BorderMode = Enum.BorderMode.Inset,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		BorderColor3 = Color3.new(0, 0, 0),
 		Text = "Copy",
+		TextColor3 = Color3.fromRGB(145, 145, 145),
 		AutoButtonColor = false,
 		FontFace = Library.Font,
 		TextSize = Library.FontSize,
@@ -958,10 +942,12 @@ function Library:NewPicker(default, parent, count, flag, callback)
 	local Toggle = Library:Create('TextButton', {
 		Parent = ModeInline;
 		Size = UDim2.new(1, 0, 0, 15),
-		BackgroundColor3 = "MainColor",
-		BorderColor3 = "OutlineColor",
-		BorderMode = Enum.BorderMode.Inset,
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		BorderColor3 = Color3.new(0, 0, 0),
 		Text = "Paste",
+		TextColor3 = Color3.fromRGB(145, 145, 145),
 		AutoButtonColor = false,
 		FontFace = Library.Font,
 		TextSize = Library.FontSize,
@@ -1209,7 +1195,7 @@ do
 			BackgroundTransparency = 1,
 			BorderSizePixel = 0,
 			BorderColor3 = Color3.new(0, 0, 0),
-			Text = "pasta.lua",
+			Text = "Cinematic",
 			TextColor3 = "Accent",
 			AutoButtonColor = false,
 			FontFace = Library.Font,
@@ -1732,10 +1718,12 @@ do
 			local Hold = Library:Create('TextButton', {
 				Parent = ModeInline,
 				Size = UDim2.new(1, 0, 0, 15),
-				BackgroundColor3 = "MainColor",
-				BorderColor3 = "OutlineColor",
-				BorderMode = Enum.BorderMode.Inset,
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				BorderColor3 = Color3.new(0, 0, 0),
 				Text = "Hold",
+				TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 				AutoButtonColor = false,
 				FontFace = Library.Font,
 				TextSize = Library.FontSize,
@@ -1745,46 +1733,31 @@ do
 			local Toggle = Library:Create('TextButton', {
 				Parent = ModeInline,
 				Size = UDim2.new(1, 0, 0, 15),
-				BackgroundColor3 = "MainColor",
-				BorderColor3 = "OutlineColor",
-				BorderMode = Enum.BorderMode.Inset,
+				BackgroundColor3 = Color3.new(1, 1, 1),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				BorderColor3 = Color3.new(0, 0, 0),
 				Text = "Toggle",
+				TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 				AutoButtonColor = false,
 				FontFace = Library.Font,
 				TextSize = Library.FontSize,
 				TextStrokeTransparency = 0,
 				ZIndex = 1020000010
 			})
-			local Always = Library:Create('TextButton', {
-				Parent = ModeInline,
-				Size = UDim2.new(1, 0, 0, 15),
-				BackgroundColor3 = "MainColor",
-				BorderColor3 = "OutlineColor",
-				BorderMode = Enum.BorderMode.Inset,
-				Text = "Always",
-				AutoButtonColor = false,
-				FontFace = Library.Font,
-				TextSize = Library.FontSize,
-				TextStrokeTransparency = 0,
-				ZIndex = 1020000010
-			})
-			self.ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Keybind.Name, Keybind.Mode)
+			self.ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Title.Text, not Keybind.FuckThisToggle and Keybind.Mode)
 			
 			local c
 			-- // Functions
 			local function set(newkey)
 				local modetable = {
 					"Toggle",
-					"Always",
 					"Hold"
 				}
 				if string.find(tostring(newkey), "Enum") then
 					if c then
 						c:Disconnect()
-						if Keybind.Flag then
-							Library.Flags[Keybind.Flag] = false
-						end
-						Keybind.Callback(false)
+						SetState(false)
 					end
 					if tostring(newkey):find("Enum.KeyCode.") then
 						newkey = Enum.KeyCode[tostring(newkey):gsub("Enum.KeyCode.", "")]
@@ -1793,81 +1766,1087 @@ do
 					end
 					if newkey == Enum.KeyCode.Backspace or newkey == Enum.KeyCode.Escape then
 						Key = nil
-						if Keybind.UseKey then
-							if Keybind.Flag then
-								Library.Flags[Keybind.Flag] = Key
-							end
-							Keybind.Callback(Key)
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = Key
 						end
+						Keybind.Callback(Key)
 						local text = ""
 						Value.Text = text
-						ListValue:Update(text, Keybind.Name, Keybind.Mode)
-						ListValue:SetVisible(false)
+						self.ListValue:Update(text, self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
+						self.ListValue:SetVisible(false)
 					elseif newkey ~= nil then
 						Key = newkey
-						if Keybind.UseKey then
-							if Keybind.Flag then
-								Library.Flags[Keybind.Flag] = Key
-							end
-							Keybind.Callback(Key)
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = Key
 						end
+						Keybind.Callback(Key)
 						local text = (Library.Keys[newkey] or tostring(newkey):gsub("Enum.KeyCode.", ""))
 						Value.Text = text
-						ListValue:Update(text, Keybind.Name, Keybind.Mode)
-						if Keybind.Name == "UI Toggle" then
-							ListValue:SetColorBlue(true)
-						end
+						self.ListValue:Update(text, self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
 					end
 					Library.Flags[Keybind.Flag .. "_KEY"] = newkey
 				elseif table.find(modetable, newkey) then
-					if not Keybind.UseKey then
-						Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
-						Keybind.Mode = newkey
+					if not Keybind.FuckThisToggle then
 						if Keybind.Mode == "Toggle" then
+							Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
+							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 							Library:AddToThemeObjects(Toggle, {
 								TextColor3 = "FontColor"
 							})
 							Library:RemoveFromThemeObjects(Hold)
-							Library:RemoveFromThemeObjects(Always)
-							Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
-							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-							Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 						elseif Keybind.Mode == "Hold" then
+							Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
+							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
 							Library:AddToThemeObjects(Hold, {
 								TextColor3 = "FontColor"
 							})
 							Library:RemoveFromThemeObjects(Toggle)
-							Library:RemoveFromThemeObjects(Always)
-							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-							Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
-							Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-						elseif Keybind.Mode == "Always" then
-							State = true
-							ListValue:SetColorBlue()
-							if Keybind.Flag then
-								Library.Flags[Keybind.Flag] = State
-							end
-							Keybind.Callback(true)
-							Library:AddToThemeObjects(Always, {
-								TextColor3 = "FontColor"
-							})
-							Library:RemoveFromThemeObjects(Toggle)
-							Library:RemoveFromThemeObjects(Hold)
-							Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-							Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
-							Library:TweenProperty(Always, "TextColor3", Library.FontColor, 0.2)
 						end
+						Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
+						Keybind.Mode = newkey
 						if Key ~= nil then
-							ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), Keybind.Name, Keybind.Mode)
+							self.ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), self.Name, not Keybind.FuckThisToggle and Keybind.Mode)
 						end
 					end
 				else
-					State = newkey
 					if Keybind.Flag then
 						Library.Flags[Keybind.Flag] = newkey
 					end
 					Keybind.Callback(newkey)
 				end
+			end
+			--
+			set(Keybind.State)
+			set(Keybind.Mode)
+			Library:Connection(Outline.MouseButton1Click, function()
+				if not Keybind.Binding then
+					Value.Text = "..."
+					Keybind.Binding = Library:Connection(userinput.InputBegan, function(input)
+						set(input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode or input.UserInputType)
+						Library:Disconnect(Keybind.Binding)
+						task.wait()
+						Keybind.Binding = nil
+					end
+					)
+				end
+			end)
+			--
+			if not Keybind.FuckThisToggle then
+				Library:Connection(userinput.InputBegan, function(inp)
+					if not userinput:GetFocusedTextBox() then	
+						if (inp.KeyCode == Key or inp.UserInputType == Key) and not Keybind.Binding and not Keybind.UseKey then
+							if Keybind.Mode == "Hold" then
+								c = Library:Connection(runserv.RenderStepped, function()
+									SetState(true)
+								end)
+							elseif Keybind.Mode == "Toggle" then
+								SetState()
+								if self.Toggled then
+									Library:TweenProperty(Title, "TextColor3", self.Risky and Color3.fromRGB(255, 0, 0) or Library.FontColor, 0.2)
+								else
+									Library:TweenProperty(Title, "TextColor3", self.Risky and Color3.fromRGB(255, 77, 74) or Color3.fromRGB(145, 145, 145), 0.2)
+								end
+							end
+						end
+					end
+				end)
+				--
+				Library:Connection(userinput.InputEnded, function(inp)
+					if not userinput:GetFocusedTextBox() then
+						if Keybind.Mode == "Hold" and not Keybind.UseKey then
+							if Key ~= "" or Key ~= nil then
+								if inp.KeyCode == Key or inp.UserInputType == Key then
+									if c then
+										c:Disconnect()
+										SetState(false)
+									end
+								end
+							end
+						end
+					end
+				end)
+				--
+				Library:Connection(Outline.MouseButton2Down, function()
+					Library:ManageTransparency(ModeOutline, "ModeOutline2", 0.2, ModeOutline.Visible)
+				end)
+				--
+				Library:Connection(Hold.MouseButton1Down, function()
+					set("Hold")
+					Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
+					Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+				end)
+				--
+				Library:Connection(Toggle.MouseButton1Down, function()
+					set("Toggle")
+					Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
+					Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+				end)
+				--
+				Library:Connection(userinput.InputBegan, function(Input)
+					if ModeOutline.Visible and Input.UserInputType == Enum.UserInputType.MouseButton1 then
+						if not Library:IsMouseOverFrame(ModeOutline) then
+							Library:ManageTransparency(ModeOutline, "ModeOutline2", 0.2, ModeOutline.Visible)
+						end
+					end
+				end)
+			end
+			--
+			Library:Connection(Outline.MouseEnter, function()
+				Library:TweenProperty(Outline, "BorderColor3", Library.Accent, 0.2)
+			end)
+			--
+			Library:Connection(Outline.MouseLeave, function()
+				Library:TweenProperty(Outline, "BorderColor3", Color3.new(0.0392, 0.0392, 0.0392), 0.2)
+			end)
+			--
+			Library.Flags[Keybind.Flag .. "_KEY"] = Keybind.State
+			Library.Flags[Keybind.Flag .. "_KEY STATE"] = Keybind.Mode
+			Flags[Keybind.Flag] = set
+			Flags[Keybind.Flag .. "_KEY"] = set
+			Flags[Keybind.Flag .. "_KEY STATE"] = set
+			--
+			function Keybind:Set(key)
+				set(key)
+			end
+		
+			-- // Returning
+			return Keybind
+		end
+		function Toggle:Colorpicker(Properties)
+			local Properties = Properties or {}
+			local Colorpicker = {
+				State = (
+					Properties.state
+						or Properties.State
+						or Properties.def
+						or Properties.Def
+						or Properties.default
+						or Properties.Default
+						or Color3.fromRGB(255, 0, 0)
+				),
+				Callback = (
+					Properties.callback
+						or Properties.Callback
+						or Properties.callBack
+						or Properties.CallBack
+						or function()
+				end
+				),
+				Flag = (
+					Properties.flag
+						or Properties.Flag
+						or Properties.pointer
+						or Properties.Pointer
+						or Library.NextFlag()
+				),
+			}
+			-- // Functions
+			Toggle.Colorpickers = Toggle.Colorpickers + 1
+			local colorpickertypes = Library:NewPicker(
+				Colorpicker.State,
+				NewToggle,
+				Toggle.Colorpickers - 1,
+				Colorpicker.Flag,
+				Colorpicker.Callback
+			)
+			function Colorpicker:Set(color)
+				colorpickertypes:set(color)
+			end
+
+			-- // Returning
+			return Colorpicker
+		end
+		function Toggle.Set(bool)
+			bool = type(bool) == "boolean" and bool or false
+			if Toggle.Toggled ~= bool then
+				SetState()
+				local color
+				if Toggle.Risky then
+					color = Toggle.Toggled and Color3.fromRGB(255, 0, 0) or Color3.fromRGB(255, 77, 74)
+				else
+					color = Toggle.Toggled and Library.FontColor or Color3.fromRGB(145, 145, 145)
+				end
+				Library:TweenProperty(Title, "TextColor3", color, 0.2)
+			end
+		end
+		-- // Misc Functions
+		Toggle.Set(Toggle.State)
+		Library.Flags[Toggle.Flag] = Toggle.State
+		Flags[Toggle.Flag] = Toggle.Set
+		Library.Toggles[Toggle.Flag] = Toggle
+
+		-- // Returning
+		return Toggle
+	end
+	--
+	function Sections:Slider(Properties)
+		if not Properties then
+			Properties = {}
+		end
+		--
+		local Slider = {
+			Window = self.Window,
+			Page = self.Page,
+			Section = self,
+			Name = Properties.Name or nil,
+			Min = (Properties.min or Properties.Min or Properties.minimum or Properties.Minimum or 0),
+			State = (
+				Properties.state
+					or Properties.State
+					or Properties.def
+					or Properties.Def
+					or Properties.default
+					or Properties.Default
+					or 0
+			),
+			Max = (Properties.max or Properties.Max or Properties.maximum or Properties.Maximum or 100),
+			Sub = (
+				Properties.suffix
+					or Properties.Suffix
+					or Properties.ending
+					or Properties.Ending
+					or Properties.prefix
+					or Properties.Prefix
+					or Properties.measurement
+					or Properties.Measurement
+					or ""
+			),
+			Decimals = (Properties.decimals or Properties.Decimals or 1),
+			Callback = (
+				Properties.callback
+					or Properties.Callback
+					or Properties.callBack
+					or Properties.CallBack
+					or function()
+			end
+			),
+			Flag = (
+				Properties.flag
+					or Properties.Flag
+					or Properties.pointer
+					or Properties.Pointer
+					or Library.NextFlag()
+			),
+		}
+		local TextValue = ("[value]" .. Slider.Sub)
+		--
+		local NewSlider = Library:Create('TextButton', {
+			Parent = Slider.Section.Elements.SectionContent,
+			Size = UDim2.new(1, 0, 0, 22),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "",
+			TextColor3 = Color3.new(0, 0, 0),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = 14,
+		})
+		local Outline = Library:Create('Frame', {
+			Parent = NewSlider,
+			Position = UDim2.new(0, 15, 1, 0),
+			Size = UDim2.new(1, -30, 0, 7),
+			BackgroundColor3 = "OutlineColor",
+			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
+			AnchorPoint = NewVector2(0, 1)
+		})
+		local Inline = Library:Create('Frame', {
+			Parent = Outline,
+			Position = UDim2.new(0, 1, 0, 1),
+			Size = UDim2.new(1, -2, 1, -2),
+			BackgroundColor3 = "MainColor",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0)
+		})
+		local Accent = Library:Create('TextButton', {
+			Parent = Inline,
+			Size = UDim2.new(0, 0, 1, 0),
+			BackgroundColor3 = "Accent",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "",
+			TextColor3 = Color3.new(0, 0, 0),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = 14
+		})
+		local Add = Library:Create('TextButton', {
+			Parent = Outline,
+			Position = UDim2.new(1, 5, 0.5, 0),
+			Size = UDim2.new(0, 10, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			AnchorPoint = NewVector2(0, 0.5),
+			Text = "+",
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0
+		})
+		local Subtract = Library:Create('TextButton', {
+			Parent = Outline,
+			Position = UDim2.new(0, -15, 0.5, 0),
+			Size = UDim2.new(0, 10, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			AnchorPoint = NewVector2(0, 0.5),
+			Text = "-",
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0
+		})
+		local Title = Library:Create('TextLabel', {
+			Parent = NewSlider,
+			Position = UDim2.new(0, 15, 0, 0),
+			Size = UDim2.new(1, 0, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = Slider.Name,
+			TextStrokeTransparency = 0,
+		})
+		local Value = Library:Create('TextBox', {
+			Parent = NewSlider,
+			Position = UDim2.new(0, 15, 0, 0),
+			Size = UDim2.new(1, -30, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			TextColor3 = "FontColor",
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			TextStrokeTransparency = 0
+		})
+		--
+		-- // Functions
+		local Sliding = false
+		local Val = Slider.State
+		local function Round(Number, Float)
+			return math.floor(Number / Float + 0.5) * Float
+		end
+		
+		local function Set(value)
+			value = math.clamp(Round(value, Slider.Decimals), Slider.Min, Slider.Max)
+			local sizeX = ((value - Slider.Min) / (Slider.Max - Slider.Min))
+			Library:TweenProperty(Accent, "Size", UDim2.new(sizeX, 0, 1, 0), 0.2)
+			Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", value))
+			Val = value
+			Library.Flags[Slider.Flag] = value
+			Slider.Callback(value)
+		end	
+		--
+		local function Slide(input)
+			local sizeX = (input.Position.X - Outline.AbsolutePosition.X) / Outline.AbsoluteSize.X
+			local value = ((Slider.Max - Slider.Min) * sizeX) + Slider.Min
+			Set(value)
+		end
+		--
+		Library:Connection(NewSlider.InputBegan, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				Sliding = true
+				Slide(input)
+			end
+		end)
+		Library:Connection(NewSlider.InputEnded, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				Sliding = false
+			end
+		end)
+		Library:Connection(Accent.InputBegan, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				Sliding = true
+				Slide(input)
+			end
+		end)
+		Library:Connection(Accent.InputEnded, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				Sliding = false
+			end
+		end)
+		Library:Connection(userinput.InputChanged, function(input)
+			if input.UserInputType == Enum.UserInputType.MouseMovement then
+				if Sliding then
+					Slide(input)
+				end
+			end
+		end)
+		Library:Connection(NewSlider.MouseEnter, function()
+			Library:TweenProperty(Title, "TextColor3", Library.Accent, 0.2)
+		end)
+		--
+		Library:Connection(NewSlider.MouseLeave, function()
+			Library:TweenProperty(Title, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
+		end)
+		--
+		Library:Connection(Subtract.MouseButton1Down, function()
+			Set(Val - Slider.Decimals)
+		end)
+		Library:Connection(Value.FocusLost, function()
+			if tonumber(Value.Text) then
+				Set(Value.Text)
+			else
+				Set(Library.Flags[Slider.Flag])
+			end
+		end)
+		--
+		Library:Connection(Add.MouseButton1Down, function()
+			Set(Val + Slider.Decimals)
+		end)
+		--
+		function Slider:Set(Value)
+			Set(Value)
+		end
+		--
+		function Slider:SetVisible(Bool)
+			NewSlider.Visible = Bool
+		end 
+		--
+		Flags[Slider.Flag] = Set
+		Library.Flags[Slider.Flag] = Slider.State
+		Set(Slider.State)
+
+		-- // Returning
+		return Slider
+	end
+	--
+	function Sections:Dropdown(Properties)
+		local Properties = Properties or {};
+		local Dropdown = {
+			Window = self.Window,
+			Page = self.Page,
+			Section = self,
+			Open = false,
+			Name = Properties.Name or Properties.name or nil,
+			Options = (Properties.options or Properties.Options or Properties.values or Properties.Values or {
+				"1",
+				"2",
+				"3",
+			}),
+			Max = (Properties.Max or Properties.max or nil),
+			State = (
+				Properties.state
+					or Properties.State
+					or Properties.def
+					or Properties.Def
+					or Properties.default
+					or Properties.Default
+					or nil
+			),
+			Callback = (
+				Properties.callback
+					or Properties.Callback
+					or Properties.callBack
+					or Properties.CallBack
+					or function()
+			end
+			),
+			Flag = (
+				Properties.flag
+					or Properties.Flag
+					or Properties.pointer
+					or Properties.Pointer
+					or Library.NextFlag()
+			),
+			OptionInsts = {},
+		}
+		--
+		local NewDrop = Library:Create('Frame', {
+			Parent = Dropdown.Section.Elements.SectionContent,
+			Size = UDim2.new(1.12, 0, 0, 30),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0)
+		})
+		local Outline = Library:Create('TextButton', {
+			Parent = NewDrop,
+			Position = UDim2.new(0, 0, 1, 1),
+			Size = UDim2.new(1, -30, 0, 17),
+			BackgroundColor3 = "OutlineColor",
+			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
+			AnchorPoint = NewVector2(0, 1),
+			Text = "",
+			AutoButtonColor = false
+		})
+		local Inline = Library:Create('Frame', {
+			Parent = Outline,
+			Position = UDim2.new(0, 1, 0, 1),
+			Size = UDim2.new(1, -2, 1, -2),
+			BackgroundColor3 = "MainColor",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0)
+		})
+		local Value = Library:Create('TextLabel', {
+			Parent = Inline,
+			Position = UDim2.new(0, 4, 0, 0),
+			Size = UDim2.new(1, -30, 1, 0),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			TextColor3 = "FontColor",
+			FontFace = Library.Font,
+			Text = "",
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextStrokeTransparency = 0,
+			TextWrapped = true
+		})
+		local Icon = Library:Create('TextLabel', {
+			Parent = Inline,
+			Position = UDim2.new(0, -5, 0, 0),
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "+",
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			TextStrokeTransparency = 0
+		})
+		local Title = Library:Create('TextLabel', {
+			Parent = NewDrop,
+			Position = UDim2.new(0, 0, 0, 0),
+			Size = UDim2.new(1, 0, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextStrokeTransparency = 0,
+			Text = Dropdown.Name
+		})
+		local ContainerOutline = Library:Create('Frame', {
+			Parent = NewDrop,
+			Position = UDim2.new(0, 0, 1, 2),
+			Size = UDim2.new(1, -30, 0, 0),
+			BackgroundColor3 = "OutlineColor",
+			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
+			ZIndex = 5,
+			Visible = false
+		})
+		local ContainerInline = Library:Create('ScrollingFrame', {
+			Parent = ContainerOutline,
+			ScrollingDirection = Enum.ScrollingDirection.Y,
+			ScrollBarThickness = 3,
+			CanvasSize = UDim2.new(0, 0, 0, 0),
+			ScrollBarImageColor3 = "Accent",
+			AutomaticCanvasSize = Enum.AutomaticSize.Y,
+			Position = UDim2.new(0, 1, 0, 1),
+			Size = UDim2.new(1, -2, 1, -2),
+			BackgroundColor3 = "MainColor",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			ZIndex = 6;
+		})
+		Library:Create('UIListLayout', {
+			Parent = ContainerInline,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		})
+		local sizesaved
+		-- // Connections
+		Library:Connection(Outline.MouseButton1Down, function()
+			if not ContainerOutline.Visible then
+				ContainerOutline.Visible = true
+				Library:TweenProperty(ContainerOutline, "Size", sizesaved, 0.25)
+				NewDrop.ZIndex = 2
+				Icon.Text = "-"
+			else
+				Library:TweenProperty(ContainerOutline, "Size", UDim2.new(1, -30, 0, 0), 0.25)
+				NewDrop.ZIndex = 1
+				Icon.Text = "+"
+				task.wait(0.25)
+				ContainerOutline.Visible = false
+			end
+		end)
+		Library:Connection(userinput.InputBegan, function(Input)
+			if ContainerOutline.Visible and Input.UserInputType == Enum.UserInputType.MouseButton1 then
+				if not Library:IsMouseOverFrame(ContainerOutline) and not Library:IsMouseOverFrame(NewDrop) then
+					Library:TweenProperty(ContainerOutline, "Size", UDim2.new(1, -30, 0, 0), 0.25)
+					NewDrop.ZIndex = 1
+					Icon.Text = "+"
+					task.wait(0.25)
+					ContainerOutline.Visible = false
+				end
+			end
+		end)
+		Library:Connection(NewDrop.MouseEnter, function()
+			Library:TweenProperty(Outline, "BorderColor3", Library.Accent, 0.2)
+			Library:TweenProperty(Title, "TextColor3", Library.Accent, 0.2)
+		end)
+		
+		Library:Connection(NewDrop.MouseLeave, function()
+			Library:TweenProperty(Outline, "BorderColor3", Color3.new(0.0392, 0.0392, 0.0392), 0.2)
+			Library:TweenProperty(Title, "TextColor3", Color3.new(0.5686, 0.5686, 0.5686), 0.2)
+		end)
+		--
+		local chosen = Dropdown.Max and {} or nil
+		--
+		local function handleoptionclick(option, button, text)
+			Library:Connection(button.MouseButton1Down, function()
+				if Dropdown.Max and Dropdown.Max > 1 then
+					if table.find(chosen, option) then
+						table.remove(chosen, table.find(chosen, option))
+						local textchosen = {}
+						local cutobject = false
+						for _, opt in next, chosen do
+							table.insert(textchosen, opt)
+						end
+						Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
+						Library:TweenProperty(text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						Library.Flags[Dropdown.Flag] = chosen
+						Dropdown.Callback(chosen)
+					else
+						if #chosen == Dropdown.Max then
+							Library:TweenProperty(Dropdown.OptionInsts[chosen[1]].text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+							table.remove(chosen, 1)
+						end
+						table.insert(chosen, option)
+						local textchosen = {}
+						local cutobject = false
+						for _, opt in next, chosen do
+							table.insert(textchosen, opt)
+						end
+						Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
+						Library:TweenProperty(text, "TextColor3", Color3.new(1, 1, 1), 0.2)
+						Library.Flags[Dropdown.Flag] = chosen
+						Dropdown.Callback(chosen)
+					end
+				else
+					if chosen == option then
+						chosen = nil
+						Value.Text = ""
+						Library:TweenProperty(text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+					else
+						for _, tbl in next, Dropdown.OptionInsts do
+							Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						end
+						chosen = option
+						Value.Text = option
+						Library:TweenProperty(text, "TextColor3", Color3.new(1, 1, 1), 0.2)
+					end
+		
+					Library.Flags[Dropdown.Flag] = chosen
+					Dropdown.Callback(chosen)
+				end
+			end)
+		end
+		--
+		local function createoptions(tbl)
+			for _, option in next, tbl do
+				Dropdown.OptionInsts[option] = {}
+				local NewOption = Library:Create('TextButton', {
+					Parent = ContainerInline,
+					Size = UDim2.new(1, 0, 0, 15),
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.new(0, 0, 0),
+					Text = "",
+					TextColor3 = Color3.new(0, 0, 0),
+					AutoButtonColor = false,
+					FontFace = Library.Font,
+					TextSize = 14,
+					ZIndex = 7;
+				})
+				local OptionName = Library:Create('TextLabel', {
+					Parent = NewOption,
+					Position = UDim2.new(0, 2, 0, 0),
+					Size = UDim2.new(1, 0, 1, 0),
+					BackgroundColor3 = Color3.new(1, 1, 1),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					BorderColor3 = Color3.new(0, 0, 0),
+					Text = option,
+					TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+					FontFace = Library.Font,
+					TextSize = Library.FontSize,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextStrokeTransparency = 0,
+					ZIndex = 8;
+				})
+				--
+				if #tbl ~= 0 then
+					local typeshit = #tbl * 15.5
+					sizesaved = UDim2.new(1, -30, 0, math.clamp(typeshit, 0, 155))
+				end
+				Dropdown.OptionInsts[option].button = NewOption
+				Dropdown.OptionInsts[option].text = OptionName
+				handleoptionclick(option, NewOption, OptionName)
+			end
+		end
+		createoptions(Dropdown.Options)
+		--
+		local set
+		set = function(option)
+			if Dropdown.Max and Dropdown.Max > 1 then
+				table.clear(chosen)
+				option = type(option) == "table" and option or {}
+				for opt, tbl in next, Dropdown.OptionInsts do
+					if not table.find(option, opt) then
+						Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+					end
+				end
+				for _, opt in next, option do
+					if table.find(Dropdown.Options, opt) and #chosen < Dropdown.Max then
+						table.insert(chosen, opt)
+						Library:TweenProperty(Dropdown.OptionInsts[opt].text, "TextColor3", Color3.new(1, 1, 1), 0.2)
+					end
+				end
+				local textchosen = {}
+				local cutobject = false
+				for _, opt in next, chosen do
+					table.insert(textchosen, opt)
+				end
+				Value.Text = #chosen == 0 and "" or table.concat(textchosen, ",") .. (cutobject and ", ..." or "")
+				Library.Flags[Dropdown.Flag] = chosen
+				Dropdown.Callback(chosen)
+			end
+		end
+		--
+		function Dropdown:Set(option)
+			if Dropdown.Max and Dropdown.Max > 1 then
+				set(option)
+			else
+				for opt, tbl in next, Dropdown.OptionInsts do
+					if opt ~= option then
+						Library:TweenProperty(tbl.text, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+					end
+				end
+				if option then
+					if typeof(option) == "table" then
+						option = option[1]
+					end
+					chosen = option
+					Value.Text = option
+					if table.find(Dropdown.Options, option) then
+						Library:TweenProperty(Dropdown.OptionInsts[option].text, "TextColor3", Color3.fromRGB(255, 255, 255), 0.2)
+					end
+					Library.Flags[Dropdown.Flag] = chosen
+					Dropdown.Callback(chosen)
+				else
+					chosen = nil
+					Value.Text = ""
+					Library.Flags[Dropdown.Flag] = chosen
+					Dropdown.Callback(chosen)
+				end
+			end
+		end
+		--
+		function Dropdown:Refresh(tbl)
+			for _, opt in next, Dropdown.OptionInsts do
+				coroutine.wrap(function()
+					opt.button:Destroy()
+				end)()
+			end
+			table.clear(Dropdown.OptionInsts)
+			createoptions(tbl)
+			if Dropdown.Max and Dropdown.Max > 1 then
+				table.clear(chosen)
+			else
+				chosen = nil
+			end
+			Library.Flags[Dropdown.Flag] = chosen
+			Dropdown.Callback(chosen)
+		end
+
+		-- // Returning
+		if Dropdown.Max and Dropdown.Max > 1 then
+			Flags[Dropdown.Flag] = set
+		else
+			Flags[Dropdown.Flag] = Dropdown
+		end
+		if (Dropdown.Max and Dropdown.Max > 1) or typeof(Dropdown.State) == "string" then
+			Dropdown:Set(Dropdown.State)
+		elseif typeof(Dropdown.State) == "table" then
+			Dropdown:Set(Dropdown.State[1])
+		end
+		function Dropdown:SetVisible(Bool)
+			NewDrop.Visible = Bool
+		end
+		return Dropdown
+	end
+	--
+	function Sections:Keybind(Properties)
+		local Properties = Properties or {}
+		local Keybind = {
+			Section = self,
+			Name = Properties.name or Properties.Name or "Keybind",
+			State = (
+				Properties.state
+					or Properties.State
+					or Properties.def
+					or Properties.Def
+					or Properties.default
+					or Properties.Default
+					or nil
+			),
+			Mode = (Properties.mode or Properties.Mode or "Toggle"),
+			UseKey = (Properties.UseKey or false),
+			Ignore = (Properties.ignore or Properties.Ignore or false),
+			Callback = (
+				Properties.callback
+					or Properties.Callback
+					or Properties.callBack
+					or Properties.CallBack
+					or function()
+			end
+			),
+			Flag = (
+				Properties.flag
+					or Properties.Flag
+					or Properties.pointer
+					or Properties.Pointer
+					or Library.NextFlag()
+			),
+			Binding = nil,
+		}
+		local Key
+		local State = false
+		--
+		local NewKey = Library:Create('Frame', {
+			Parent = Keybind.Section.Elements.SectionContent,
+			Size = UDim2.new(1, 0, 0, 12),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0)
+		})
+		local Outline = Library:Create('TextButton', {
+			Parent = NewKey,
+			Position = UDim2.new(1, 0, 0.5, 0),
+			Size = UDim2.new(0, 40, 0, 12),
+			BackgroundColor3 = "OutlineColor",
+			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
+			AnchorPoint = NewVector2(1, 0.5),
+			Text = "",
+			AutoButtonColor = false
+		})
+		local Inline = Library:Create('Frame', {
+			Parent = Outline,
+			Position = UDim2.new(0, 1, 0, 1),
+			Size = UDim2.new(1, -2, 1, -2),
+			BackgroundColor3 = "MainColor",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0)
+		})
+		local Value = Library:Create('TextLabel', {
+			Parent = Inline,
+			Size = UDim2.new(1, 0, 1, 0),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "",
+			TextColor3 = "FontColor",
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0
+		})
+		local Title = Library:Create('TextLabel', {
+			Parent = NewKey,
+			Position = UDim2.new(0, 15, 0, 0),
+			Size = UDim2.new(1, 0, 0, 10),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,	
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			Text = Keybind.Name,
+			TextStrokeTransparency = 0
+		})
+		local ModeOutline = Library:Create('Frame', {
+			Parent = NewKey,
+			Position = UDim2.new(1, 65, 0.5, 0),
+			Size = UDim2.new(0, 60, 0, 12),
+			BackgroundColor3 = "OutlineColor",
+			BorderColor3 = Color3.new(0.0392, 0.0392, 0.0392),
+			AnchorPoint = NewVector2(1, 0.5),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Rotation = 0.00001,
+			Visible = false,
+			ZIndex = 1020000010
+		})
+		local ModeInline = Library:Create('Frame', {
+			Parent = ModeOutline,
+			Position = UDim2.new(0, 1, 0, 1),
+			Size = UDim2.new(1, -2, 1, -2),
+			BackgroundColor3 = "MainColor",
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			ZIndex = 1020000010
+		})
+		Library:Create('UIListLayout', {
+			Parent = ModeInline,
+			SortOrder = Enum.SortOrder.LayoutOrder
+		})
+		local Hold = Library:Create('TextButton', {
+			Parent = ModeInline,
+			Size = UDim2.new(1, 0, 0, 15),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "Hold",
+			TextColor3 = Keybind.Mode == "Hold" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0,
+			ZIndex = 1020000010
+		})
+		local Toggle = Library:Create('TextButton', {
+			Parent = ModeInline,
+			Size = UDim2.new(1, 0, 0, 15),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "Toggle",
+			TextColor3 = Keybind.Mode == "Toggle" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0,
+			ZIndex = 1020000010
+		})
+		local Always = Library:Create('TextButton', {
+			Parent = ModeInline,
+			Size = UDim2.new(1, 0, 0, 15),
+			BackgroundColor3 = Color3.new(1, 1, 1),
+			BackgroundTransparency = 1,
+			BorderSizePixel = 0,
+			BorderColor3 = Color3.new(0, 0, 0),
+			Text = "Always",
+			TextColor3 = Keybind.Mode == "Always" and Color3.new(1, 1, 1) or Color3.new(0.5686, 0.5686, 0.5686),
+			AutoButtonColor = false,
+			FontFace = Library.Font,
+			TextSize = Library.FontSize,
+			TextStrokeTransparency = 0,
+			ZIndex = 1020000010
+		})
+		local ListValue = Library.KeyList:NewKey(tostring(Keybind.State):gsub("Enum.KeyCode.", ""), Keybind.Name, Keybind.Mode)
+		local c
+		-- // Functions
+		local function set(newkey)
+			local modetable = {
+				"Toggle",
+				"Always",
+				"Hold"
+			}
+			if string.find(tostring(newkey), "Enum") then
+				if c then
+					c:Disconnect()
+					if Keybind.Flag then
+						Library.Flags[Keybind.Flag] = false
+					end
+					Keybind.Callback(false)
+				end
+				if tostring(newkey):find("Enum.KeyCode.") then
+					newkey = Enum.KeyCode[tostring(newkey):gsub("Enum.KeyCode.", "")]
+				elseif tostring(newkey):find("Enum.UserInputType.") then
+					newkey = Enum.UserInputType[tostring(newkey):gsub("Enum.UserInputType.", "")]
+				end
+				if newkey == Enum.KeyCode.Backspace or newkey == Enum.KeyCode.Escape then
+					Key = nil
+					if Keybind.UseKey then
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = Key
+						end
+						Keybind.Callback(Key)
+					end
+					local text = ""
+					Value.Text = text
+					ListValue:Update(text, Keybind.Name, Keybind.Mode)
+					ListValue:SetVisible(false)
+				elseif newkey ~= nil then
+					Key = newkey
+					if Keybind.UseKey then
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = Key
+						end
+						Keybind.Callback(Key)
+					end
+					local text = (Library.Keys[newkey] or tostring(newkey):gsub("Enum.KeyCode.", ""))
+					Value.Text = text
+					ListValue:Update(text, Keybind.Name, Keybind.Mode)
+					if Keybind.Name == "UI Toggle" then
+						ListValue:SetColorBlue(true)
+					end
+				end
+				Library.Flags[Keybind.Flag .. "_KEY"] = newkey
+			elseif table.find(modetable, newkey) then
+				if not Keybind.UseKey then
+					Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
+					Keybind.Mode = newkey
+					if Keybind.Mode == "Toggle" then
+						Library:AddToThemeObjects(Toggle, {
+							TextColor3 = "FontColor"
+						})
+						Library:RemoveFromThemeObjects(Hold)
+						Library:RemoveFromThemeObjects(Always)
+						Library:TweenProperty(Toggle, "TextColor3", Library.FontColor, 0.2)
+						Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+					elseif Keybind.Mode == "Hold" then
+						Library:AddToThemeObjects(Hold, {
+							TextColor3 = "FontColor"
+						})
+						Library:RemoveFromThemeObjects(Toggle)
+						Library:RemoveFromThemeObjects(Always)
+						Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						Library:TweenProperty(Hold, "TextColor3", Library.FontColor, 0.2)
+						Library:TweenProperty(Always, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+					elseif Keybind.Mode == "Always" then
+						State = true
+						ListValue:SetColorBlue()
+						if Keybind.Flag then
+							Library.Flags[Keybind.Flag] = State
+						end
+						Keybind.Callback(true)
+						Library:AddToThemeObjects(Always, {
+							TextColor3 = "FontColor"
+						})
+						Library:RemoveFromThemeObjects(Toggle)
+						Library:RemoveFromThemeObjects(Hold)
+						Library:TweenProperty(Toggle, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						Library:TweenProperty(Hold, "TextColor3", Color3.fromRGB(145, 145, 145), 0.2)
+						Library:TweenProperty(Always, "TextColor3", Library.FontColor, 0.2)
+					end
+					if Key ~= nil then
+						ListValue:Update((Library.Keys[Key] or tostring(Key):gsub("Enum.KeyCode.", "")), Keybind.Name, Keybind.Mode)
+					end
+				end
+			else
+				State = newkey
+				if Keybind.Flag then
+					Library.Flags[Keybind.Flag] = newkey
+				end
+				Keybind.Callback(newkey)
 			end
 		end
 		--
@@ -2251,10 +3230,10 @@ do
 			BackgroundTransparency = 1,
 			BorderSizePixel = 0,
 			BorderColor3 = Color3.new(0, 0, 0),
-			Text = Button.Name,
 			TextColor3 = Color3.new(0.5686, 0.5686, 0.5686),
 			FontFace = Library.Font,
 			TextSize = Library.FontSize,
+			Text = Button.Name,
 			TextStrokeTransparency = 0
 		})
 		Library:Connection(NewButton.MouseEnter, function()
@@ -2310,7 +3289,9 @@ do
 		return Label
 	end
 	task.spawn(function()
-		repeat task.wait() until Library.IsLoaded
+		repeat
+			task.wait()
+		until Library.IsLoaded
 		local Config = Library.Window:Page({
 			Name = "Settings",
 			LastPage = true
@@ -2358,75 +3339,75 @@ do
 					CFGList:Set(SelectedConfig)
 				end
 			end
-	PresetThemes:Dropdown({
-		Name = "Presets",
-		Flag = "UI/Presets",
-		Options = {
-			"Tokyo Night",
-			"Kanagawa",						
-			"Quartz",
-			"BBot",
-			"Fatality",
-			"Jester",
-			"Mint",
-			"Ubuntu",
-			"Abyss",
-			"Neverlose",
-			"Aimware",
-			"Youtube",
-			"Gamesense",
-			"Onetap",
-			"Entropy",
-			"Interwebz",
-			"Dracula",
-			"Spotify",
-			"Sublime",
-			"Vape",
-			"Neko",
-			"Corn",
-			"Minecraft",
-			"Nord",
-			"Monokai",
-			"Cyberpunk",
-			"Solarized Dark",
-			"Gruvbox",
-			"Night Owl",
-			"Arc Dark",
-			"Catppuccin",
-			"Tomorrow Night",
-			"Molokai",
-			"Material Palenight",
-			"Oceanic Next",
-			"Spacegray",
-			"PaperColor Dark",
-			"Edge",
-			"One Dark",
-			"Tokyo Dark",
-			"DOS",
-			"CRT Green",
-			"Matrix",
-			"Old Terminal",
-			"Midnight Retro",
-			"Neo Noir",
-			"Dark Cherry",
-			"Vintage Code",
-			"Oblivion",
-			"Nocturne",
-			"Zerox",
-			"Void",
-			"Carbon",
-			"Black Ice",
-			"Terminal Wave"
-		},
-		State = "Tokyo Night",
-		Callback = function(v)
-			local themes = {
+			PresetThemes:Dropdown({
+				Name = "Presets",
+				Flag = "UI/Presets",
+				Options = {
+					"Tokyo Night",
+					"Kanagawa",
+					"Quartz",
+					"BBot",
+					"Fatality",
+					"Jester",
+					"Mint",
+					"Ubuntu",
+					"Abyss",
+					"Neverlose",
+					"Aimware",
+					"Youtube",
+					"Gamesense",
+					"Onetap",
+					"Entropy",
+					"Interwebz",
+					"Dracula",
+					"Spotify",
+					"Sublime",
+					"Vape",
+					"Neko",
+					"Corn",
+					"Minecraft",
+					"Nord",
+					"Monokai",
+					"Cyberpunk",
+					"Solarized Dark",
+					"Gruvbox",
+					"Night Owl",
+					"Arc Dark",
+					"Catppuccin",
+					"Tomorrow Night",
+					"Molokai",
+					"Material Palenight",
+					"Oceanic Next",
+					"Spacegray",
+					"PaperColor Dark",
+					"Edge",
+					"One Dark",
+					"Tokyo Dark",
+					"DOS",
+					"CRT Green",
+					"Matrix",
+					"Old Terminal",
+					"Midnight Retro",
+					"Neo Noir",
+					"Dark Cherry",
+					"Vintage Code",
+					"Oblivion",
+					"Nocturne",
+					"Zerox",
+					"Void",
+					"Carbon",
+					"Black Ice",
+					"Terminal Wave"
+				},
+				State = "Carbon",
+				Callback = function(v)
+					local themes = {
 						['Tokyo Night'] = {
-										FontColor = "#FFFFFF",
-										MainColor = "#191925",
-										Accent = "#6759B3",
-										BackgroundColor = "#16161F",
-										OutlineColor = "#323232"
+							FontColor = "#FFFFFF",
+							MainColor = "#191925",
+							Accent = "#6759B3",
+							BackgroundColor = "#16161F",
+							OutlineColor = "#323232"
 						},
 						Kanagawa = {
 							FontColor = "#dcd7ba",
